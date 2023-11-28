@@ -2125,4 +2125,9 @@ Test 6
     fun executeCONST02() {
         assertEquals(listOf("100"), outputOf("CONST02"))
     }
+
+    @Test
+    fun executeCONST03() {
+        assertEquals(listOf("'", "''"), outputOf("CONST03"))
+    }
 }
