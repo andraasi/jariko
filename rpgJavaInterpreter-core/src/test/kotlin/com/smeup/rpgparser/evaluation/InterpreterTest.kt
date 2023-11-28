@@ -585,8 +585,8 @@ open class InterpreterTest : AbstractTest() {
     }
 
     @Test
-    fun executeSORTANUM() {
-        assertEquals(listOf("0", "1", "4", "5", "6", "8", "9"), outputOf("SORTANUM"))
+    fun executeSORTA() {
+        assertEquals(listOf("A", "B", "C", "D", "A", "B", "C", "D", "D", "C", "B", "A", "4", "3", "2", "1"), outputOf("SORTA"))
     }
 
     @Test @Ignore
@@ -752,14 +752,14 @@ Test 6
     @Test
     fun executeMOVE() {
         assertEquals(
-            listOf("ZYXWA", "ABCDE", "FGHIJ", "     ".trim(), "ZY123", "ZY456", "99123", "99456", "ZYXYY", "DE"),
+            listOf("ZYXWA", "ABCDE", "FGHIJ", "     ".trim(), "ZY123", "ZY456", "99123", "99456", "ZYXYY", "DE", "DE", "DE"),
             outputOf("MOVE")
         )
     }
 
     @Test
     fun executeMOVEP() {
-        assertEquals(listOf("  ABC", "  123", "  456", "456", "  ABC", "BC"), outputOf("MOVEP"))
+        assertEquals(listOf("  ABC", "  123", "  456", "456", "  ABC", "BC", "  ABC", "  ABC"), outputOf("MOVEP"))
     }
 
     @Test
