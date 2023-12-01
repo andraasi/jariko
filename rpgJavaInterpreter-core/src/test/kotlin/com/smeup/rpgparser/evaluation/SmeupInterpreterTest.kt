@@ -43,15 +43,15 @@ open class SmeupInterpreterTest : AbstractTest() {
     }
 
     /**
-     * This is a performance test function for the T01_10_P02 program.
+     * This is a performance test function for the T01_10_P03 program.
      * The function executes the T01_10_P02 program and measures the time taken for different operations and then,
      * it calculates the average time taken for each operation.
      * After that execute the Java implementation of the T01_10_P02.
      * The results are then printed to the console.
      */
-    @Test()
+    @Test
     @Category(PerformanceTest::class)
-    fun executeT01_10_P02() {
+    fun executeT01_10_P03() {
         var original = 0.0
         var varying = 0.0
         var exsrOverhead = 0.0
@@ -71,21 +71,21 @@ open class SmeupInterpreterTest : AbstractTest() {
                 }
             }
         }
-        executePgm(programName = "smeup/T01_10_P02", systemInterface = systemInterface)
-        println("T01_10_P02(RPGLE): original: ${original / iteration}ms")
-        println("T01_10_P02(RPGLE): varying: ${varying / iteration}ms")
-        println("T01_10_P02(RPGLE): exsrOverhead: ${exsrOverhead / iteration}ms")
-        executeJavaT01_10_P02()
+        executePgm(programName = "smeup/T01_10_P03", systemInterface = systemInterface)
+        println("T01_10_P03(RPGLE): original: ${original / iteration}ms")
+        println("T01_10_P03(RPGLE): varying: ${varying / iteration}ms")
+        println("T01_10_P03(RPGLE): exsrOverhead: ${exsrOverhead / iteration}ms")
+        executeJavaT01_10_P03()
     }
 
     /**
-     * This function is a performance test for a Java implementation of T01_10_P02 program.
+     * This function is a performance test for a Java implementation of T01_10_P03 program.
      * It measures the time taken to perform a specific operation a certain number of times.
      * The operation involves the evaluation of string variable (varying and not) and the assignment in a map similar to a symbol table.
      * The not varying variable is assigned to a string with a fixed length, while the varying variable is assigned to a string with a variable length.
      * The results of the test are printed to the console.
      */
-    private fun executeJavaT01_10_P02() {
+    private fun executeJavaT01_10_P03() {
         var original = 0L
         val varying: Long
         val padding = 2560
@@ -122,7 +122,7 @@ open class SmeupInterpreterTest : AbstractTest() {
         varying = System.currentTimeMillis() - start
 
         // Print the results to the console
-        println("T01_10_P02(Java): original: ${original}ms")
-        println("T01_10_P02(Java): varying: ${varying}ms")
+        println("T01_10_P03(Java): original: ${original}ms")
+        println("T01_10_P03(Java): varying: ${varying}ms")
     }
 }
