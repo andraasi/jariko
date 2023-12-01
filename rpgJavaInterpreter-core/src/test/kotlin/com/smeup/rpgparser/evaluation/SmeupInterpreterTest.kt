@@ -87,7 +87,7 @@ open class SmeupInterpreterTest : AbstractTest() {
      */
     private fun executeJavaT01_10_P02() {
         var original = 0L
-        var varying = 0L
+        var varying: Long
         val padding = 2560
         val iteration = 5
         val symbolTable = mutableMapOf(
@@ -103,7 +103,7 @@ open class SmeupInterpreterTest : AbstractTest() {
                 // Perform the original operation
                 symbolTable["£DBG_Str"] = (symbolTable["£DBG_Str"] as StringBuilder).clear().append("Hello World!".padEnd(padding))
                 symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
-            } while ((symbolTable["NNN"] as BigDecimal)!!.toLong() > 0)
+            } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
         // Calculate the time taken for the original operation
         original += (System.currentTimeMillis() - start)
@@ -116,7 +116,7 @@ open class SmeupInterpreterTest : AbstractTest() {
                 // Perform the varying operation
                 symbolTable["£DBG_Str_var"] = (symbolTable["£DBG_Str_var"] as StringBuilder).clear().append("Hello World!")
                 symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
-            } while ((symbolTable["NNN"] as BigDecimal)!!.toLong() > 0)
+            } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
         // Calculate the time taken for the varying operation
         varying = System.currentTimeMillis() - start
