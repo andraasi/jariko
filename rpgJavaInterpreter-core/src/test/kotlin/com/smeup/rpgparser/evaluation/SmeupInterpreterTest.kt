@@ -42,6 +42,12 @@ open class SmeupInterpreterTest : AbstractTest() {
         assertEquals(expected, "smeup/T02_A30".outputOf())
     }
 
+    @Test
+    fun executeT04_A40() {
+        val expected = listOf("A40_P1(122469.88)A40_P2(987.22)A40_P3(123456.10)A40_P4(121028170.03)")
+        assertEquals(expected, "smeup/T04_A40".outputOf())
+    }
+
     /**
      * This is a performance test function for the T01_10_P03 program.
      * The function executes the T01_10_P02 program and measures the time taken for different operations and then,
