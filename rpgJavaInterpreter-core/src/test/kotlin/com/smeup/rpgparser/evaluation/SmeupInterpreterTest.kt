@@ -87,7 +87,7 @@ open class SmeupInterpreterTest : AbstractTest() {
      */
     private fun executeJavaT01_10_P02() {
         var original = 0L
-        var varying: Long
+        val varying: Long
         val padding = 2560
         val iteration = 5
         val symbolTable = mutableMapOf(
