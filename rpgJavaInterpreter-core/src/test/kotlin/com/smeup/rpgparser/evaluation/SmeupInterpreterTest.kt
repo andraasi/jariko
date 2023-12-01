@@ -49,15 +49,15 @@ open class SmeupInterpreterTest : AbstractTest() {
     }
 
     /**
-     * This is a performance test function for the T01_10_P03 program.
+     * This is a performance test function for the T01_A10_P03 program.
      * The function executes the T01_10_P02 program and measures the time taken for different operations and then,
      * it calculates the average time taken for each operation.
-     * After that execute the Java implementation of the T01_10_P02.
+     * After that execute the Java implementation of the T01_A10_P03.
      * The results are then printed to the console.
      */
     @Test
     @Category(PerformanceTest::class)
-    fun executeT01_10_P03() {
+    fun executeT01_A10_P03() {
         var original = 0.0
         var varying = 0.0
         var exsrOverhead = 0.0
@@ -77,11 +77,11 @@ open class SmeupInterpreterTest : AbstractTest() {
                 }
             }
         }
-        executePgm(programName = "smeup/T01_10_P03", systemInterface = systemInterface)
-        println("T01_10_P03(RPGLE): original: ${original / iteration}ms")
-        println("T01_10_P03(RPGLE): varying: ${varying / iteration}ms")
-        println("T01_10_P03(RPGLE): exsrOverhead: ${exsrOverhead / iteration}ms")
-        executeJavaT01_10_P03()
+        executePgm(programName = "smeup/T01_A10_P03", systemInterface = systemInterface)
+        println("T01_A10_P03(RPGLE): original: ${original / iteration}ms")
+        println("T01_A10_P03(RPGLE): varying: ${varying / iteration}ms")
+        println("T01_A10_P03(RPGLE): exsrOverhead: ${exsrOverhead / iteration}ms")
+        executeJavaT01_A10_P03()
     }
 
     /**
@@ -91,7 +91,7 @@ open class SmeupInterpreterTest : AbstractTest() {
      * The not varying variable is assigned to a string with a fixed length, while the varying variable is assigned to a string with a variable length.
      * The results of the test are printed to the console.
      */
-    private fun executeJavaT01_10_P03() {
+    private fun executeJavaT01_A10_P03() {
         var original = 0L
         val varying: Long
         val padding = 2560
@@ -107,7 +107,8 @@ open class SmeupInterpreterTest : AbstractTest() {
         for (i in 1..iteration) {
             do {
                 // Perform the original operation
-                symbolTable["£DBG_Str"] = (symbolTable["£DBG_Str"] as StringBuilder).clear().append("Hello World!".padEnd(padding))
+                symbolTable["£DBG_Str"] =
+                    (symbolTable["£DBG_Str"] as StringBuilder).clear().append("Hello World!".padEnd(padding))
                 symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
             } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
@@ -120,7 +121,8 @@ open class SmeupInterpreterTest : AbstractTest() {
         for (i in 1..iteration) {
             do {
                 // Perform the varying operation
-                symbolTable["£DBG_Str_var"] = (symbolTable["£DBG_Str_var"] as StringBuilder).clear().append("Hello World!")
+                symbolTable["£DBG_Str_var"] =
+                    (symbolTable["£DBG_Str_var"] as StringBuilder).clear().append("Hello World!")
                 symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
             } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
@@ -128,7 +130,7 @@ open class SmeupInterpreterTest : AbstractTest() {
         varying = System.currentTimeMillis() - start
 
         // Print the results to the console
-        println("T01_10_P03(Java): original: ${original}ms")
-        println("T01_10_P03(Java): varying: ${varying}ms")
+        println("T01_A10_P03(Java): original: ${original}ms")
+        println("T01_A10_P03(Java): varying: ${varying}ms")
     }
 }
