@@ -93,8 +93,8 @@ open class SmeupInterpreterTest : AbstractTest() {
      * The results of the test are printed to the console.
      */
     private fun executeJavaT01_A10_P03() {
-        var original = 0L
-        val varying: Long
+        val original: Double
+        val varying: Double
         val padding = 2560
         val iteration = 5
         val symbolTable = mutableMapOf(
@@ -114,7 +114,7 @@ open class SmeupInterpreterTest : AbstractTest() {
             } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
         // Calculate the time taken for the original operation
-        original += (System.currentTimeMillis() - start)
+        original = (System.currentTimeMillis() - start).toDouble()
 
         // Start the timer for the varying operation
         start = System.currentTimeMillis()
@@ -128,11 +128,11 @@ open class SmeupInterpreterTest : AbstractTest() {
             } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
         // Calculate the time taken for the varying operation
-        varying = System.currentTimeMillis() - start
+        varying = (System.currentTimeMillis() - start).toDouble()
 
         // Print the results to the console
-        println("T01_A10_P03(Java): original: ${original/iteration}ms")
-        println("T01_A10_P03(Java): varying: ${varying/iteration}ms")
+        println("T01_A10_P03(Java): original: ${original / iteration}ms")
+        println("T01_A10_P03(Java): varying: ${varying / iteration}ms")
     }
 
     /**
@@ -146,9 +146,9 @@ open class SmeupInterpreterTest : AbstractTest() {
     @Category(PerformanceTest::class)
     fun executeT01_A20_P02() {
         // Initialize the duration variable to store the total duration of all executions
-        var duration = 0L
+        var duration = 0.0
         // Define the number of iterations for the test
-        val iteration = 5
+        val iteration = 100
         // Create a JavaSystemInterface to interact with the program
         val systemInterface = JavaSystemInterface().apply {
             // Define the onDisplay function to capture the duration from the display messages
@@ -176,7 +176,7 @@ open class SmeupInterpreterTest : AbstractTest() {
         // Print the average duration of the program executions to the console
         println("T01_A20_P02(RPGLE): Duration: ${duration / iteration}ms")
         // Execute the Java implementation of the program
-        executeJavaT01_A20_P02()
+        executeJavaT01_A20_P02(iteration = iteration)
     }
 
     /**
@@ -185,11 +185,9 @@ open class SmeupInterpreterTest : AbstractTest() {
      * The operation involves assigning a string to a variable in a symbol table and decrementing a counter until it reaches zero.
      * The function then calculates the average time taken for these operations and prints the result to the console.
      */
-    private fun executeJavaT01_A20_P02() {
+    private fun executeJavaT01_A20_P02(iteration: Int) {
         // Initialize the duration variable to store the total duration of all executions
-        var duration = 0L
-        // Define the number of iterations for the test
-        val iteration = 5
+        var duration = 0.0
         // Create a symbol table with initial values
         val symbolTable = mutableMapOf(
             "NNN" to BigDecimal(100000),
@@ -215,7 +213,7 @@ open class SmeupInterpreterTest : AbstractTest() {
             } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
         // Calculate the time taken for the operation
-        duration += (System.currentTimeMillis() - start)
+        duration = (System.currentTimeMillis() - start).toDouble()
 
         // Print the average time taken for the operation to the console
         println("T01_A20_P02(Java): Duration: ${duration / iteration}ms")

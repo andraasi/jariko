@@ -1,7 +1,7 @@
      D £DBG_TIMINI     S               Z
      D £DBG_TIMEND     S               Z
      D DURATION        S             20  0
-     D EXT_LOOP        S              2  0  INZ(5)
+     D EXT_LOOP        S              3  0  INZ(100)
      D MSG             S            100
      D £DBG_Str        S           2560    VARYING
      D A20_A15         S             15
