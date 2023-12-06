@@ -334,8 +334,7 @@ $usage
             if (!jfrPath.getParentFile().exists()) {
                 jfrPath.getParentFile().mkdirs()
             }
-            jvmArgs "-XX:+UnlockCommercialFeatures",
-                    "-XX:+FlightRecorder",
+            jvmArgs "-XX:+FlightRecorder",
                     "-XX:StartFlightRecording=duration=100s,filename=${jfrPath.path}",
                     "-XX:FlightRecorderOptions=${project.FlightRecorderOptions}",
                     "-XX:+UnlockDiagnosticVMOptions",
