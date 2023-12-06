@@ -187,7 +187,7 @@ open class SmeupInterpreterTest : AbstractTest() {
      */
     private fun executeJavaT01_A20_P02(iteration: Int) {
         // Initialize the duration variable to store the total duration of all executions
-        var duration = 0.0
+        val duration: Double
         // Create a symbol table with initial values
         val symbolTable = mutableMapOf(
             "NNN" to BigDecimal(100000),
@@ -208,6 +208,74 @@ open class SmeupInterpreterTest : AbstractTest() {
             do {
                 // Assign a string to a variable in the symbol table
                 symbolTable["A20_A15"] = "Lorem quam"
+                // Decrement the counter in the symbol table
+                symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
+            } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
+        }
+        // Calculate the time taken for the operation
+        duration = (System.currentTimeMillis() - start).toDouble()
+
+        // Print the average time taken for the operation to the console
+        println("T01_A20_P02(Java): Duration: ${duration / iteration}ms")
+    }
+
+    @Test
+    @Category(PerformanceTest::class)
+    fun executeT01_A20_P20() {
+        var duration = 0.0
+        // Define the number of iterations for the test
+        val iteration = 1
+        // Create a JavaSystemInterface to interact with the program
+        val systemInterface = JavaSystemInterface().apply {
+            // Define the onDisplay function to capture the duration from the display messages
+            onDisplay = { message, _ ->
+                // If the message starts with "Duration:", extract the duration and add it to the total duration
+                if (message.startsWith("Duration:")) {
+                    duration += message.substringAfter("Duration:").trim().toLong()
+                } else {
+                    // If the message does not start with "Duration:", throw an error
+                    error("message not expected: $message")
+                }
+            }
+        }
+        // Create a Configuration object for the program execution
+        val configuration = Configuration().apply {
+            // Disable debugging information for the program execution
+            options.debuggingInformation = false
+        }
+        // Execute the program with the defined system interface and configuration
+        executePgm(
+            programName = "smeup/T01_A20_P20",
+            systemInterface = systemInterface,
+            configuration = configuration
+        )
+        // Print the average duration of the program executions to the console
+        println("T01_A20_P20(RPGLE): Duration: ${duration / iteration}ms")
+        executeJavaT01_A20_P20(iteration = iteration)
+    }
+
+    private fun executeJavaT01_A20_P20(iteration: Int) {
+        // Initialize the duration variable to store the total duration of all executions
+        val duration: Double
+        // Create a symbol table with initial values
+        val symbolTable = mutableMapOf(
+            "NNN" to BigDecimal(100000),
+            "A20_A30000V" to "",
+            "£DBG_Str" to ""
+        )
+
+        // Start the timer for the operation
+        val start: Long = System.currentTimeMillis()
+        // Reset the counter in the symbol table
+        symbolTable["NNN"] = BigDecimal(100000)
+        // Perform the operation for the defined number of iterations
+        for (i in 1..iteration) {
+            do {
+                val literal = """
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum posuere nisl at neque auctor bibendum. Pellentesque eget risus eu mi accumsan commodo ut a eros. Aliquam a augue eros. Integer vitae cursus arcu. In pulvinar erat massa, at pulvinar enim euismod in. Vestibulum a posuere risus. Donec bibendum facilisis enim ac bibendum. Mauris in fringilla nunc.Aliquam odio purus, eleifend id posuere id, tristique in justo. Morbi in faucibus urna, et iaculis lacus. Proin aliquam porttitor ullamcorper. Donec malesuada nisi sodales neque suscipit, condimentum aliquam diam volutpat. Maecenas lacinia, metus nec porta tempor, ex quam pharetra risus, at euismod metus magna et neque. Etiam neque magna, tristique eget semper eu, consequat eu nisl. Sed interdum, eros a maximus ultricies, tortor elit hendrerit risus, sit amet eleifend justo lectus quis purus. Duis bibendum metus et ante hendrerit scelerisque. Duis hendrerit metus ut felis suscipit dapibus. Donec ac mi eu erat lobortis dapibus. Aliquam rutrum risus sed massa accumsan dignissim. Vestibulum at libero tristique, consequat tortor in, blandit orci. Etiam eleifend gravida dui. Nam posuere, nibh non facilisis condimentum, quam libero ullamcorper quam, eu fringilla est risus nec quam. Integer laoreet elit metus, sed ullamcorper augue congue vel. Mauris eget aliquam ante. Cras sit amet nulla et mi posuere porttitor quis elementum lacus. Donec eget placerat ligula, finibus bibendum leo.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum posuere nisl at neque auctor bibendum. Pellentesque eget risus eu mi accumsan commodo ut a eros. Aliquam a augue eros. Integer vitae cursus arcu. In pulvinar erat massa, at pulvinar enim euismod in. Vestibulum a posuere risus. Donec bibendum facilisis enim ac bibendum. Mauris in fringilla nunc.Aliquam odio purus, eleifend id posuere id, tristique in justo. Morbi in faucibus urna, et iaculis lacus. Proin aliquam porttitor ullamcorper. Donec malesuada nisi sodales neque suscipit, condimentum aliquam diam volutpat. Maecenas lacinia, metus nec porta tempor, ex quam pharetra risus, at euismod metus magna et neque. Etiam neque magna, tristique eget semper eu, consequat eu nisl. Sed interdum, eros a maximus ultricies, tortor elit hendrerit risus, sit amet eleifend justo lectus quis purus. Duis bibendum metus et ante hendrerit scelerisque. Duis hendrerit metus ut felis suscipit dapibus. Donec ac mi eu erat lobortis dapibus. Aliquam rutrum risus sed massa accumsan dignissim. Vestibulum at libero tristique, consequat tortor in, blandit orci. Etiam eleifend gravida dui. Nam posuere, nibh non facilisis condimentum, quam libero ullamcorper quam, eu fringilla est risus nec quam. Integer laoreet elit metus, sed ullamcorper augue congue vel. Mauris eget aliquam ante. Cras sit amet nulla et mi posuere porttitor quis elementum lacus. Donec eget placerat ligula, finibus bibendum leo.
+        """.trimIndent()
+                // Assign a string to a variable in the symbol table
+                symbolTable["A20_A30000V"] = literal
                 // Decrement the counter in the symbol table
                 symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
             } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
