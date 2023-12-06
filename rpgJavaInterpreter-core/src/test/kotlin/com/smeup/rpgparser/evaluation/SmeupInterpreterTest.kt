@@ -2,6 +2,7 @@ package com.smeup.rpgparser.evaluation
 
 import com.smeup.rpgparser.AbstractTest
 import com.smeup.rpgparser.PerformanceTest
+import com.smeup.rpgparser.execution.Configuration
 import com.smeup.rpgparser.jvminterop.JavaSystemInterface
 import org.junit.Test
 import org.junit.experimental.categories.Category
@@ -132,5 +133,60 @@ open class SmeupInterpreterTest : AbstractTest() {
         // Print the results to the console
         println("T01_A10_P03(Java): original: ${original}ms")
         println("T01_A10_P03(Java): varying: ${varying}ms")
+    }
+
+    @Test
+    @Category(PerformanceTest::class)
+    fun executeT01_A20_P02() {
+        var duration = 0L
+        // are inside the program
+        val iteration = 5
+        val systemInterface = JavaSystemInterface().apply {
+            onDisplay = { message, _ ->
+                if (message.startsWith("Duration:")) {
+                    duration += message.substringAfter("Duration:").trim().toLong()
+                } else {
+                    error("message not expected: $message")
+                }
+            }
+        }
+        val configuration = Configuration().apply {
+            options.debuggingInformation = false
+        }
+        executePgm(
+            programName = "smeup/T01_A20_P02",
+            systemInterface = systemInterface,
+            configuration = configuration
+        )
+        println("T01_A20_P02(RPGLE): Duration: ${duration / iteration}ms")
+        executeJavaT01_A20_P02()
+    }
+
+    private fun executeJavaT01_A20_P02() {
+        var duration = 0L
+        val iteration = 5
+        val symbolTable = mutableMapOf(
+            "NNN" to BigDecimal(100000),
+            "A20_A15" to "",
+            "£DBG_Str" to ""
+        )
+        for (i in 1..100) {
+            symbolTable["VAR$i"] = ""
+        }
+
+        val start: Long = System.currentTimeMillis()
+        symbolTable["NNN"] = BigDecimal(100000)
+        for (i in 1..iteration) {
+            do {
+                // Perform the original operation
+                symbolTable["A20_A15"] = "Lorem quam"
+                symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
+            } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
+        }
+        // Calculate the time taken for the original operation
+        duration += (System.currentTimeMillis() - start)
+
+        // Print the results to the console
+        println("T01_A20_P02(Java): Duration: ${duration / iteration}ms")
     }
 }
