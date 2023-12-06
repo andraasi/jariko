@@ -131,8 +131,8 @@ open class SmeupInterpreterTest : AbstractTest() {
         varying = System.currentTimeMillis() - start
 
         // Print the results to the console
-        println("T01_A10_P03(Java): original: ${original}ms")
-        println("T01_A10_P03(Java): varying: ${varying}ms")
+        println("T01_A10_P03(Java): original: ${original/iteration}ms")
+        println("T01_A10_P03(Java): varying: ${varying/iteration}ms")
     }
 
     /**
