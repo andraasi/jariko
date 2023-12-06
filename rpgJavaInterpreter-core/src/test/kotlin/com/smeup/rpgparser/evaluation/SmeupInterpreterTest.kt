@@ -135,58 +135,89 @@ open class SmeupInterpreterTest : AbstractTest() {
         println("T01_A10_P03(Java): varying: ${varying}ms")
     }
 
+    /**
+     * This function is a performance test for the T01_A20_P02 program.
+     * It measures the time taken to execute the program and prints the average duration to the console.
+     * The function uses a JavaSystemInterface to capture the duration of each execution from the display messages.
+     * The function also disables debugging information for the program execution.
+     * After executing the RPGLE program, it also executes the Java implementation of the same program.
+     */
     @Test
     @Category(PerformanceTest::class)
     fun executeT01_A20_P02() {
+        // Initialize the duration variable to store the total duration of all executions
         var duration = 0L
-        // are inside the program
+        // Define the number of iterations for the test
         val iteration = 5
+        // Create a JavaSystemInterface to interact with the program
         val systemInterface = JavaSystemInterface().apply {
+            // Define the onDisplay function to capture the duration from the display messages
             onDisplay = { message, _ ->
+                // If the message starts with "Duration:", extract the duration and add it to the total duration
                 if (message.startsWith("Duration:")) {
                     duration += message.substringAfter("Duration:").trim().toLong()
                 } else {
+                    // If the message does not start with "Duration:", throw an error
                     error("message not expected: $message")
                 }
             }
         }
+        // Create a Configuration object for the program execution
         val configuration = Configuration().apply {
+            // Disable debugging information for the program execution
             options.debuggingInformation = false
         }
+        // Execute the program with the defined system interface and configuration
         executePgm(
             programName = "smeup/T01_A20_P02",
             systemInterface = systemInterface,
             configuration = configuration
         )
+        // Print the average duration of the program executions to the console
         println("T01_A20_P02(RPGLE): Duration: ${duration / iteration}ms")
+        // Execute the Java implementation of the program
         executeJavaT01_A20_P02()
     }
 
+    /**
+     * This function is a performance test for the Java implementation of the T01_A20_P02 program.
+     * It measures the time taken to perform a specific operation a certain number of times.
+     * The operation involves assigning a string to a variable in a symbol table and decrementing a counter until it reaches zero.
+     * The function then calculates the average time taken for these operations and prints the result to the console.
+     */
     private fun executeJavaT01_A20_P02() {
+        // Initialize the duration variable to store the total duration of all executions
         var duration = 0L
+        // Define the number of iterations for the test
         val iteration = 5
+        // Create a symbol table with initial values
         val symbolTable = mutableMapOf(
             "NNN" to BigDecimal(100000),
             "A20_A15" to "",
             "£DBG_Str" to ""
         )
+        // Initialize additional variables in the symbol table
         for (i in 1..100) {
             symbolTable["VAR$i"] = ""
         }
 
+        // Start the timer for the operation
         val start: Long = System.currentTimeMillis()
+        // Reset the counter in the symbol table
         symbolTable["NNN"] = BigDecimal(100000)
+        // Perform the operation for the defined number of iterations
         for (i in 1..iteration) {
             do {
-                // Perform the original operation
+                // Assign a string to a variable in the symbol table
                 symbolTable["A20_A15"] = "Lorem quam"
+                // Decrement the counter in the symbol table
                 symbolTable["NNN"] = (symbolTable["NNN"] as BigDecimal).subtract(BigDecimal.valueOf(1))
             } while ((symbolTable["NNN"] as BigDecimal).toLong() > 0)
         }
-        // Calculate the time taken for the original operation
+        // Calculate the time taken for the operation
         duration += (System.currentTimeMillis() - start)
 
-        // Print the results to the console
+        // Print the average time taken for the operation to the console
         println("T01_A20_P02(Java): Duration: ${duration / iteration}ms")
     }
 }
