@@ -379,6 +379,8 @@ internal fun RpgParser.DspecContext.toAst(
                 it.ascend = ascend
             }
         } else {
+            // overwrite dim
+            (baseType as ArrayType).nElements = compileTimeInterpreter.evaluate(this.rContext(), dim!!).asInt().value.toInt()
             baseType
         }
     } else {
