@@ -9,9 +9,9 @@
      C                   EVAL      ARR(1)=1
      C                   EVAL      ARR(2)=2
      C                   EVAL      ARR(3)=3
-     C                   EVAL      ARR(1)=3
-     C                   EVAL      ARR(2)=2
-     C                   EVAL      ARR(3)=1
+     C                   EVAL      ARR_RES(1)=3
+     C                   EVAL      ARR_RES(2)=2
+     C                   EVAL      ARR_RES(3)=1
      C                   ADD       ARR           ARR_RES
      C                   EVAL      RES=%CHAR(ARR_RES(1))+', '
      C                                  +%CHAR(ARR_RES(2))+', '
