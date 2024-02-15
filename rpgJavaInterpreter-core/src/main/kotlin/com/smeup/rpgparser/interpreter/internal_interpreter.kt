@@ -951,8 +951,20 @@ open class InternalInterpreter(
 
                     ConcreteArrayValue(newAddend2, addend2.elementType)
                 }
-                // TODO Case when `addend1` is NumberValue and `addend2` is ConcreteArrayValue
-                // TODO Case when `addend1` is   and `addend2` is NumberValue
+                /*
+                 * When one of the addends is a field, a literal, or a figurative constant and the other addend is array,
+                 * the operation is done once for every element in the shorter array.
+                 * The same field, literal, or figurative constant is used in all of the operations.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
+                addend1 is NumberValue && addend2 is ConcreteArrayValue -> {
+                    val newAddend2 = addend2.elements.mapIndexed { index, value -> calculatePlus(addend1, value) }.toMutableList()
+                    ConcreteArrayValue(newAddend2, addend2.elementType)
+                }
+                addend1 is ConcreteArrayValue && addend2 is NumberValue -> {
+                    val newAddend2 = addend1.elements.mapIndexed { index, value -> calculatePlus(addend2, value) }.toMutableList()
+                    ConcreteArrayValue(newAddend2, addend1.elementType)
+                }
                 else -> calculatePlus(addend1, addend2)
             }
         } catch (e: Exception) {
