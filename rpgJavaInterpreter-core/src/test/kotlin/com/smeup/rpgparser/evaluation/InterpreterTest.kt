@@ -2231,7 +2231,12 @@ Test 6
 
     @Test
     fun executeADD_ARRAY() {
-        val expected = listOf("4, 4, 4")
+        val expected = listOf(
+            "4, 4, 4",
+            "4.0, 4.0, 4.0",
+            "3, 3, 3",
+            "3.5, 3.5, 3.5"
+        )
         assertEquals(expected, "ADD_ARRAY".outputOf())
     }
 }
