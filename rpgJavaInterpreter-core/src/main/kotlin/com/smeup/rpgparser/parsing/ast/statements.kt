@@ -27,6 +27,7 @@ import com.smeup.rpgparser.parsing.parsetreetoast.acceptBody
 import com.smeup.rpgparser.parsing.parsetreetoast.error
 import com.smeup.rpgparser.parsing.parsetreetoast.isInt
 import com.smeup.rpgparser.parsing.parsetreetoast.toAst
+import com.smeup.rpgparser.parsing.parsetreetoast.todo
 import com.smeup.rpgparser.utils.ComparisonOperator
 import com.smeup.rpgparser.utils.divideAtIndex
 import com.smeup.rpgparser.utils.resizeTo
@@ -37,6 +38,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.require
 import kotlin.system.measureTimeMillis
 
 interface StatementThatCanDefineData {
@@ -1149,10 +1151,14 @@ data class ZSubStmt(
 
     override fun execute(interpreter: InterpreterCore) {
         val value = interpreter.eval(expression)
-        require(value is NumberValue) {
-            "$value should be a number"
+        when (value) {
+            is NumberValue -> interpreter.assign(target, value.negate())
+            is ConcreteArrayValue -> {
+                val newValue = ConcreteArrayValue(value.elements.map { single -> (single as NumberValue).negate() }.toMutableList(), value.elementType)
+                interpreter.assign(target, newValue)
+            }
+            else -> todo("$value should be a number")
         }
-        interpreter.assign(target, value.negate())
     }
 }
 
