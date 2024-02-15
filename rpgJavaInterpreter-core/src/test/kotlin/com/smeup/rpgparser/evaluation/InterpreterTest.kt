@@ -2225,7 +2225,7 @@ Test 6
 
     @Test
     fun executeZ_SUB_ARRAY() {
-        val expected = listOf("-1", "2", "-3")
+        val expected = listOf("-1, 2, -3")
         assertEquals(expected, "Z_SUB_ARRAY".outputOf())
     }
 }
