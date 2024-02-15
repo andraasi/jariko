@@ -62,7 +62,7 @@
      C                                  +%CHAR(ARR_DEC_RES(3))
      C     RES           DSPLY
 
-     D* With integer values and when Factor 1 size is greater than Result
+     D* With integer values and when Factor 2 size is greater than Result
      C                   EVAL      ARR_INT(1)=1
      C                   EVAL      ARR_INT(2)=2
      C                   EVAL      ARR_INT(3)=3
@@ -73,13 +73,23 @@
      C                                  +%CHAR(ARR_INT_RES_S2(2))
      C     RES           DSPLY
 
-     D* With integer values and when Factor 1 size is smaller than Result
+     D* With integer values and when Factor 2 size is smaller than Result
      C                   EVAL      ARR_INT_S2(1)=1
      C                   EVAL      ARR_INT_S2(2)=2
      C                   EVAL      ARR_INT_RES(1)=3
      C                   EVAL      ARR_INT_RES(2)=2
      C                   EVAL      ARR_INT_RES(3)=1
      C                   ADD       ARR_INT_S2    ARR_INT_RES
+     C                   EVAL      RES=%CHAR(ARR_INT_RES(1))+', '
+     C                                  +%CHAR(ARR_INT_RES(2))+', '
+     C                                  +%CHAR(ARR_INT_RES(3))
+     C     RES           DSPLY
+
+     D* With integer values and when Factor 2 isn't as array as Result, but Integer
+     C                   EVAL      ARR_INT_RES(1)=1
+     C                   EVAL      ARR_INT_RES(2)=2
+     C                   EVAL      ARR_INT_RES(3)=3
+     C                   ADD       1             ARR_INT_RES
      C                   EVAL      RES=%CHAR(ARR_INT_RES(1))+', '
      C                                  +%CHAR(ARR_INT_RES(2))+', '
      C                                  +%CHAR(ARR_INT_RES(3))

@@ -2237,7 +2237,8 @@ Test 6
             "3, 3, 3",
             "3.5, 3.5, 3.5",
             "4, 4",
-            "4, 4, 1"
+            "4, 4, 1",
+            "2, 3, 4"
         )
         assertEquals(expected, "ADD_ARRAY".outputOf())
     }
