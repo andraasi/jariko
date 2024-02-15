@@ -2228,4 +2228,10 @@ Test 6
         val expected = listOf("-1, 2, -3")
         assertEquals(expected, "Z_SUB_ARRAY".outputOf())
     }
+
+    @Test
+    fun executeADD_ARRAY() {
+        val expected = listOf("4, 4, 4")
+        assertEquals(expected, "ADD_ARRAY".outputOf())
+    }
 }
