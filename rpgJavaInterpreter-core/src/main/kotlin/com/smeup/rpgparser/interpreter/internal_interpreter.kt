@@ -931,12 +931,28 @@ open class InternalInterpreter(
 
         try {
             return when {
+                /*
+                 * When addends 1 and 2 are arrays with the same number of elements, the operation uses the first element
+                 * from every array, then the second element from every array until all elements in the arrays are processed.
+                 * If the arrays do not have the same number of entries, the operation ends when the last element of the
+                 * array with the fewest elements has been processed.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
                 addend1 is ConcreteArrayValue && addend2 is ConcreteArrayValue -> {
-                    val newAddend2 = addend2.elements.mapIndexed { index, value -> calculatePlus(addend1.elements[index], value) }
-                    ConcreteArrayValue(newAddend2 as MutableList<Value>, addend2.elementType)
+                    val newAddend2Size = when {
+                        addend1.elements.size > addend2.elements.size -> addend2.elements.size
+                        addend1.elements.size < addend2.elements.size -> addend1.elements.size
+                        else -> addend1.elements.size
+                    }
+                    val newAddend2 = addend2.elements.subList(0, newAddend2Size).mapIndexed { index, value -> calculatePlus(addend1.elements[index], value) }.toMutableList()
+                    if (addend1.elements.size > addend2.elements.size) {
+                        newAddend2.addAll(addend1.elements.subList(addend2.elements.size, addend1.elements.size).toMutableList())
+                    }
+
+                    ConcreteArrayValue(newAddend2, addend2.elementType)
                 }
                 // TODO Case when `addend1` is NumberValue and `addend2` is ConcreteArrayValue
-                // TODO Case when `addend1` is ConcreteArrayValue  and `addend2` is NumberValue
+                // TODO Case when `addend1` is   and `addend2` is NumberValue
                 else -> calculatePlus(addend1, addend2)
             }
         } catch (e: Exception) {
