@@ -910,7 +910,7 @@ open class InternalInterpreter(
     }
 
     override fun add(statement: AddStmt): Value {
-        fun calculatePlus(addend1: Value, addend2: Value): Value {
+        fun calculate(addend1: Value, addend2: Value): Value {
             return when {
                 addend1 is IntValue && addend2 is IntValue -> IntValue(addend1.asInt().value.plus(addend2.asInt().value))
                 addend1 is IntValue && addend2 is DecimalValue -> DecimalValue(addend1.asDecimal().value.plus(addend2.value))
@@ -922,11 +922,11 @@ open class InternalInterpreter(
 
         val addend1 = eval(statement.addend1)
         require(addend1 is NumberValue || addend1 is ConcreteArrayValue) {
-            "$addend1 should be a number"
+            "$addend1 should be a number or array"
         }
         val addend2 = eval(statement.right)
         require(addend2 is NumberValue || addend2 is ConcreteArrayValue) {
-            "$addend2 should be a number"
+            "$addend2 should be a number or array"
         }
 
         try {
@@ -944,7 +944,7 @@ open class InternalInterpreter(
                         addend1.elements.size < addend2.elements.size -> addend1.elements.size
                         else -> addend1.elements.size
                     }
-                    val newAddend2 = addend2.elements.subList(0, newAddend2Size).mapIndexed { index, value -> calculatePlus(addend1.elements[index], value) }.toMutableList()
+                    val newAddend2 = addend2.elements.subList(0, newAddend2Size).mapIndexed { index, value -> calculate(addend1.elements[index], value) }.toMutableList()
                     if (addend1.elements.size > addend2.elements.size) {
                         newAddend2.addAll(addend1.elements.subList(addend2.elements.size, addend1.elements.size).toMutableList())
                     }
@@ -958,14 +958,14 @@ open class InternalInterpreter(
                  * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
                  */
                 addend1 is NumberValue && addend2 is ConcreteArrayValue -> {
-                    val newAddend2 = addend2.elements.mapIndexed { index, value -> calculatePlus(addend1, value) }.toMutableList()
+                    val newAddend2 = addend2.elements.mapIndexed { index, value -> calculate(addend1, value) }.toMutableList()
                     ConcreteArrayValue(newAddend2, addend2.elementType)
                 }
                 addend1 is ConcreteArrayValue && addend2 is NumberValue -> {
-                    val newAddend2 = addend1.elements.mapIndexed { index, value -> calculatePlus(addend2, value) }.toMutableList()
+                    val newAddend2 = addend1.elements.mapIndexed { index, value -> calculate(addend2, value) }.toMutableList()
                     ConcreteArrayValue(newAddend2, addend1.elementType)
                 }
-                else -> calculatePlus(addend1, addend2)
+                else -> calculate(addend1, addend2)
             }
         } catch (e: Exception) {
             throw UnsupportedOperationException("I do not know how to sum $addend1 and $addend2 at ${statement.position}")
@@ -973,7 +973,7 @@ open class InternalInterpreter(
     }
 
     override fun sub(statement: SubStmt): Value {
-        fun calculateMinus(minuend: Value, subtrahend: Value): Value {
+        fun calculate(minuend: Value, subtrahend: Value): Value {
             return when {
                 minuend is IntValue && subtrahend is IntValue -> IntValue(minuend.asInt().value.minus(subtrahend.asInt().value))
                 minuend is IntValue && subtrahend is DecimalValue -> DecimalValue(minuend.asDecimal().value.minus(subtrahend.value))
@@ -985,11 +985,11 @@ open class InternalInterpreter(
 
         val minuend = eval(statement.minuend)
         require(minuend is NumberValue || minuend is ConcreteArrayValue) {
-            "$minuend should be a number"
+            "$minuend should be a number or array"
         }
         val subtrahend = eval(statement.right)
-        require(subtrahend is NumberValue|| subtrahend is ConcreteArrayValue) {
-            "$subtrahend should be a number"
+        require(subtrahend is NumberValue || subtrahend is ConcreteArrayValue) {
+            "$subtrahend should be a number or array"
         }
 
         try {
@@ -1002,17 +1002,17 @@ open class InternalInterpreter(
                  * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
                  */
                 minuend is ConcreteArrayValue && subtrahend is ConcreteArrayValue -> {
-                    val newAddend2Size = when {
+                    val newMinuendSize = when {
                         minuend.elements.size > subtrahend.elements.size -> subtrahend.elements.size
                         minuend.elements.size < subtrahend.elements.size -> minuend.elements.size
                         else -> minuend.elements.size
                     }
-                    val newAddend2 = subtrahend.elements.subList(0, newAddend2Size).mapIndexed { index, value -> calculateMinus(minuend.elements[index], value) }.toMutableList()
+                    val newMinuend = subtrahend.elements.subList(0, newMinuendSize).mapIndexed { index, value -> calculate(minuend.elements[index], value) }.toMutableList()
                     if (minuend.elements.size > subtrahend.elements.size) {
-                        newAddend2.addAll(minuend.elements.subList(subtrahend.elements.size, minuend.elements.size).toMutableList())
+                        newMinuend.addAll(minuend.elements.subList(subtrahend.elements.size, minuend.elements.size).toMutableList())
                     }
 
-                    ConcreteArrayValue(newAddend2, subtrahend.elementType)
+                    ConcreteArrayValue(newMinuend, subtrahend.elementType)
                 }
                 /*
                  * When minuend or subtrahend is a field, a literal, or a figurative constant and the other is array,
@@ -1021,14 +1021,14 @@ open class InternalInterpreter(
                  * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
                  */
                 minuend is NumberValue && subtrahend is ConcreteArrayValue -> {
-                    val newAddend2 = subtrahend.elements.mapIndexed { index, value -> calculateMinus(minuend, value) }.toMutableList()
-                    ConcreteArrayValue(newAddend2, subtrahend.elementType)
+                    val newMinuend = subtrahend.elements.mapIndexed { index, value -> calculate(minuend, value) }.toMutableList()
+                    ConcreteArrayValue(newMinuend, subtrahend.elementType)
                 }
                 minuend is ConcreteArrayValue && subtrahend is NumberValue -> {
-                    val newAddend2 = minuend.elements.mapIndexed { index, value -> calculateMinus(minuend, value) }.toMutableList()
-                    ConcreteArrayValue(newAddend2, minuend.elementType)
+                    val newMinuend = minuend.elements.mapIndexed { index, value -> calculate(minuend, value) }.toMutableList()
+                    ConcreteArrayValue(newMinuend, minuend.elementType)
                 }
-                else -> calculateMinus(minuend, subtrahend)
+                else -> calculate(minuend, subtrahend)
             }
         } catch (e: Exception) {
             throw UnsupportedOperationException("I do not know how to sum $minuend and $subtrahend at ${statement.position}")
