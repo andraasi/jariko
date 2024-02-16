@@ -694,20 +694,72 @@ open class InternalInterpreter(
 
     override fun mult(statement: MultStmt): Value {
         // TODO When will pass my PR for more robustness replace Value.render with NumericValue.bigDecimal
-        require(statement.target is DataRefExpr)
-        val rightValue: BigDecimal = if (statement.factor1 != null) {
-            BigDecimal(eval(statement.factor1).render())
-        } else {
-            BigDecimal(get(statement.target.variable.referred!!).render())
+
+        fun calculate(left: Value, right: Value, halAdjust: Boolean, type: NumberType): Value {
+            val leftRendered = BigDecimal(left.render())
+            val rightRendered = BigDecimal(right.render())
+            val result = rightRendered.multiply(leftRendered)
+
+            return if (halAdjust) {
+                DecimalValue(result.setScale(type.decimalDigits, RoundingMode.HALF_UP))
+            } else {
+                DecimalValue(result.setScale(type.decimalDigits, RoundingMode.DOWN))
+            }
         }
-        val leftValue = BigDecimal(eval(statement.factor2).render())
-        val result = rightValue.multiply(leftValue)
-        val type = statement.target.variable.referred!!.type
-        require(type is NumberType)
-        return if (statement.halfAdjust) {
-            DecimalValue(result.setScale(type.decimalDigits, RoundingMode.HALF_UP))
+
+        require(statement.target is DataRefExpr)
+        val left = if (statement.factor1 != null) {
+            eval(statement.factor1)
         } else {
-            DecimalValue(result.setScale(type.decimalDigits, RoundingMode.DOWN))
+            get(statement.target.variable.referred!!)
+        }
+        val right = eval(statement.factor2)
+        val type = when {
+            statement.target.variable.referred!!.type is ArrayType -> (statement.target.variable.referred!!.type as ArrayType).element as NumberType
+            else -> statement.target.variable.referred!!.type
+        }
+        require(type is NumberType)
+
+        try {
+            return when {
+                /*
+                 * When left and right are arrays with the same number of elements, the operation uses the first element
+                 * from every array, then the second element from every array until all elements in the arrays are processed.
+                 * If the arrays do not have the same number of entries, the operation ends when the last element of the
+                 * array with the fewest elements has been processed.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
+                left is ConcreteArrayValue && right is ConcreteArrayValue -> {
+                    val newLeftSize = when {
+                        left.elements.size > right.elements.size -> right.elements.size
+                        left.elements.size < right.elements.size -> left.elements.size
+                        else -> left.elements.size
+                    }
+                    val newLeft = right.elements.subList(0, newLeftSize).mapIndexed { index, value -> calculate(left.elements[index], value, statement.halfAdjust, type) }.toMutableList()
+                    if (left.elements.size > right.elements.size) {
+                        newLeft.addAll(left.elements.subList(right.elements.size, left.elements.size).toMutableList())
+                    }
+
+                    ConcreteArrayValue(newLeft, right.elementType)
+                }
+                /*
+                 * When left or right is a field, a literal, or a figurative constant and the other is array,
+                 * the operation is done once for every element in the shorter array.
+                 * The same field, literal, or figurative constant is used in all of the operations.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
+                left is NumberValue && right is ConcreteArrayValue -> {
+                    val newLeft = right.elements.mapIndexed { index, value -> calculate(left, value, statement.halfAdjust, type) }.toMutableList()
+                    ConcreteArrayValue(newLeft, right.elementType)
+                }
+                left is ConcreteArrayValue && right is NumberValue -> {
+                    val newLeft = left.elements.mapIndexed { index, value -> calculate(left, value, statement.halfAdjust, type) }.toMutableList()
+                    ConcreteArrayValue(newLeft, left.elementType)
+                }
+                else -> calculate(left, right, statement.halfAdjust, type)
+            }
+        } catch (e: Exception) {
+            throw UnsupportedOperationException("I do not know how to multiply $left and $right at ${statement.position}")
         }
     }
 
