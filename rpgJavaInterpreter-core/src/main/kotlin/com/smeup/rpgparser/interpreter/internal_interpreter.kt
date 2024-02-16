@@ -973,20 +973,65 @@ open class InternalInterpreter(
     }
 
     override fun sub(statement: SubStmt): Value {
+        fun calculateMinus(minuend: Value, subtrahend: Value): Value {
+            return when {
+                minuend is IntValue && subtrahend is IntValue -> IntValue(minuend.asInt().value.minus(subtrahend.asInt().value))
+                minuend is IntValue && subtrahend is DecimalValue -> DecimalValue(minuend.asDecimal().value.minus(subtrahend.value))
+                minuend is DecimalValue && subtrahend is IntValue -> DecimalValue(minuend.value.minus(subtrahend.asDecimal().value))
+                minuend is DecimalValue && subtrahend is DecimalValue -> DecimalValue(minuend.value.minus(subtrahend.value))
+                else -> throw Exception()
+            }
+        }
+
         val minuend = eval(statement.minuend)
-        require(minuend is NumberValue) {
+        require(minuend is NumberValue || minuend is ConcreteArrayValue) {
             "$minuend should be a number"
         }
         val subtrahend = eval(statement.right)
-        require(subtrahend is NumberValue) {
+        require(subtrahend is NumberValue|| subtrahend is ConcreteArrayValue) {
             "$subtrahend should be a number"
         }
-        return when {
-            minuend is IntValue && subtrahend is IntValue -> IntValue(minuend.asInt().value.minus(subtrahend.asInt().value))
-            minuend is IntValue && subtrahend is DecimalValue -> DecimalValue(minuend.asDecimal().value.minus(subtrahend.value))
-            minuend is DecimalValue && subtrahend is IntValue -> DecimalValue(minuend.value.minus(subtrahend.asDecimal().value))
-            minuend is DecimalValue && subtrahend is DecimalValue -> DecimalValue(minuend.value.minus(subtrahend.value))
-            else -> throw UnsupportedOperationException("I do not know how to sum $minuend and $subtrahend at ${statement.position}")
+
+        try {
+            return when {
+                /*
+                 * When minuend and subtrahend are arrays with the same number of elements, the operation uses the first element
+                 * from every array, then the second element from every array until all elements in the arrays are processed.
+                 * If the arrays do not have the same number of entries, the operation ends when the last element of the
+                 * array with the fewest elements has been processed.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
+                minuend is ConcreteArrayValue && subtrahend is ConcreteArrayValue -> {
+                    val newAddend2Size = when {
+                        minuend.elements.size > subtrahend.elements.size -> subtrahend.elements.size
+                        minuend.elements.size < subtrahend.elements.size -> minuend.elements.size
+                        else -> minuend.elements.size
+                    }
+                    val newAddend2 = subtrahend.elements.subList(0, newAddend2Size).mapIndexed { index, value -> calculateMinus(minuend.elements[index], value) }.toMutableList()
+                    if (minuend.elements.size > subtrahend.elements.size) {
+                        newAddend2.addAll(minuend.elements.subList(subtrahend.elements.size, minuend.elements.size).toMutableList())
+                    }
+
+                    ConcreteArrayValue(newAddend2, subtrahend.elementType)
+                }
+                /*
+                 * When minuend or subtrahend is a field, a literal, or a figurative constant and the other is array,
+                 * the operation is done once for every element in the shorter array.
+                 * The same field, literal, or figurative constant is used in all of the operations.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
+                minuend is NumberValue && subtrahend is ConcreteArrayValue -> {
+                    val newAddend2 = subtrahend.elements.mapIndexed { index, value -> calculateMinus(minuend, value) }.toMutableList()
+                    ConcreteArrayValue(newAddend2, subtrahend.elementType)
+                }
+                minuend is ConcreteArrayValue && subtrahend is NumberValue -> {
+                    val newAddend2 = minuend.elements.mapIndexed { index, value -> calculateMinus(minuend, value) }.toMutableList()
+                    ConcreteArrayValue(newAddend2, minuend.elementType)
+                }
+                else -> calculateMinus(minuend, subtrahend)
+            }
+        } catch (e: Exception) {
+            throw UnsupportedOperationException("I do not know how to sum $minuend and $subtrahend at ${statement.position}")
         }
     }
 
