@@ -695,12 +695,12 @@ open class InternalInterpreter(
     override fun mult(statement: MultStmt): Value {
         // TODO When will pass my PR for more robustness replace Value.render with NumericValue.bigDecimal
 
-        fun calculate(left: Value, right: Value, halAdjust: Boolean, type: NumberType): Value {
+        fun calculate(left: Value, right: Value, halfAdjust: Boolean, type: NumberType): Value {
             val leftRendered = BigDecimal(left.render())
             val rightRendered = BigDecimal(right.render())
             val result = rightRendered.multiply(leftRendered)
 
-            return if (halAdjust) {
+            return if (halfAdjust) {
                 DecimalValue(result.setScale(type.decimalDigits, RoundingMode.HALF_UP))
             } else {
                 DecimalValue(result.setScale(type.decimalDigits, RoundingMode.DOWN))
