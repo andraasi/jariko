@@ -1,6 +1,9 @@
      D A20_AR2         S              2  0 DIM(6)
      D A20_AR3         S              2  0 DIM(6)
      D A20_ARES        S              2  0 DIM(6)
+     D A20_AR4         S              7  5 DIM(6)
+     D A20_AR5         S              7  5 DIM(6)
+     D A20_ARES2       S              7  5 DIM(6)
      D £DBG_Str        S             100          VARYING
 
      D* Z-SUB con due array
@@ -291,3 +294,66 @@
      C                                    +%CHAR(A20_AR2(6))
      C                                    +')'
      C     £DBG_Str      DSPLY
+
+     D* DIV con due array
+     C                   EVAL      A20_AR4(1)=1
+     C                   EVAL      A20_AR4(2)=2
+     C                   EVAL      A20_AR4(3)=3
+     C                   EVAL      A20_AR4(4)=5
+     C                   EVAL      A20_AR4(5)=7
+     C                   EVAL      A20_AR4(6)=11
+     C                   DIV       A20_AR4       A20_AR5
+     C                   EVAL      £DBG_Str='Res('
+     C                                    +%CHAR(A20_AR5(1))+', '
+     C                                    +%CHAR(A20_AR5(2))+', '
+     C                                    +%CHAR(A20_AR5(3))+', '
+     C                                    +%CHAR(A20_AR5(4))+', '
+     C                                    +%CHAR(A20_AR5(5))+', '
+     C                                    +%CHAR(A20_AR5(6))
+     C                                    +') Fact2('
+     C                                    +%CHAR(A20_AR4(1))+', '
+     C                                    +%CHAR(A20_AR4(2))+', '
+     C                                    +%CHAR(A20_AR4(3))+', '
+     C                                    +%CHAR(A20_AR4(4))+', '
+     C                                    +%CHAR(A20_AR4(5))+', '
+     C                                    +%CHAR(A20_AR4(6))
+     C                                    +')'
+     C     £DBG_Str      DSPLY
+
+     D* DIV con tre array
+     C*                  EVAL      A20_AR4(1)=1
+     C*                  EVAL      A20_AR4(2)=2
+     C*                  EVAL      A20_AR4(3)=3
+     C*                  EVAL      A20_AR4(4)=4
+     C*                  EVAL      A20_AR4(5)=5
+     C*                  EVAL      A20_AR4(6)=6
+     C*                  EVAL      A20_AR5(1)=6
+     C*                  EVAL      A20_AR5(2)=5
+     C*                  EVAL      A20_AR5(3)=4
+     C*                  EVAL      A20_AR5(4)=3
+     C*                  EVAL      A20_AR5(5)=2
+     C*                  EVAL      A20_AR5(6)=1
+     C*    A20_AR4       DIV       A20_AR5       A20_ARES2
+     C*                  EVAL      £DBG_Str='Res('
+     C*                                   +%CHAR(A20_ARES2(1))+', '
+     C*                                   +%CHAR(A20_ARES2(2))+', '
+     C*                                   +%CHAR(A20_ARES2(3))+', '
+     C*                                   +%CHAR(A20_ARES2(4))+', '
+     C*                                   +%CHAR(A20_ARES2(5))+', '
+     C*                                   +%CHAR(A20_ARES2(6))
+     C*                                   +') Fact2('
+     C*                                   +%CHAR(A20_AR5(1))+', '
+     C*                                   +%CHAR(A20_AR5(2))+', '
+     C*                                   +%CHAR(A20_AR5(3))+', '
+     C*                                   +%CHAR(A20_AR5(4))+', '
+     C*                                   +%CHAR(A20_AR5(5))+', '
+     C*                                   +%CHAR(A20_AR5(6))
+     C*                                   +') Fact1('
+     C*                                   +%CHAR(A20_AR4(1))+', '
+     C*                                   +%CHAR(A20_AR4(2))+', '
+     C*                                   +%CHAR(A20_AR4(3))+', '
+     C*                                   +%CHAR(A20_AR4(4))+', '
+     C*                                   +%CHAR(A20_AR4(5))+', '
+     C*                                   +%CHAR(A20_AR4(6))
+     C*                                   +')'
+     C*    £DBG_Str      DSPLY
