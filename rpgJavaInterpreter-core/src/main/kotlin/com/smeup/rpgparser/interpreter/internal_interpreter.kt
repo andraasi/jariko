@@ -683,7 +683,9 @@ open class InternalInterpreter(
             is AssignmentExpr -> {
                 assign(expression.target, expression.value)
             }
-            else -> expression.evalWith(expressionEvaluation)
+            else -> {
+                expression.evalWith(expressionEvaluation)
+            }
         }
         if (expression !is StringLiteral && expression !is IntLiteral &&
             expression !is DataRefExpr && expression !is BlanksRefExpr) {
@@ -765,30 +767,84 @@ open class InternalInterpreter(
 
     override fun div(statement: DivStmt): Value {
         // TODO When will pass my PR for more robustness replace Value.render with NumericValue.bigDecimal
+
+        fun calculate(dividend: Value, divisor: Value, halfAdjust: Boolean, type: NumberType, mvrTarget: AssignableExpression?): Value {
+            val dividendRendered = BigDecimal(dividend.render())
+            val divisorRendered = BigDecimal(divisor.render())
+            val quotient = dividendRendered.divide(divisorRendered, MathContext.DECIMAL128)
+
+            // calculation of rest
+            // NB. rest based on type of quotient
+            if (mvrTarget != null) {
+                val restType = mvrTarget.type()
+                require(restType is NumberType)
+
+                val truncatedQuotient: BigDecimal = quotient.setScale(type.decimalDigits, RoundingMode.DOWN)
+                // rest = divident - (truncatedQuotient * divisor)
+                val rest: BigDecimal = dividendRendered.subtract(truncatedQuotient.multiply(divisorRendered))
+                assign(mvrTarget, DecimalValue(rest.setScale(restType.decimalDigits, RoundingMode.DOWN)))
+            }
+            return if (halfAdjust) {
+                DecimalValue(quotient.setScale(type.decimalDigits, RoundingMode.HALF_UP))
+            } else {
+                DecimalValue(quotient.setScale(type.decimalDigits, RoundingMode.DOWN))
+            }
+        }
+
         require(statement.target is DataRefExpr)
-        val dividend: BigDecimal = if (statement.factor1 != null) {
-            BigDecimal(eval(statement.factor1).render())
+        val dividend = if (statement.factor1 != null) {
+            eval(statement.factor1)
         } else {
-            BigDecimal(get(statement.target.variable.referred!!).render())
+            get(statement.target.variable.referred!!)
         }
-        val divisor = BigDecimal(eval(statement.factor2).render())
-        val quotient = dividend.divide(divisor, MathContext.DECIMAL128)
-        val type = statement.target.variable.referred!!.type
+        val divisor = eval(statement.factor2)
+        val type = when {
+            statement.target.variable.referred!!.type is ArrayType -> (statement.target.variable.referred!!.type as ArrayType).element as NumberType
+            else -> statement.target.variable.referred!!.type
+        }
         require(type is NumberType)
-        // calculation of rest
-        // NB. rest based on type of quotient
-        if (statement.mvrTarget != null) {
-            val restType = statement.mvrTarget.type()
-            require(restType is NumberType)
-            val truncatedQuotient: BigDecimal = quotient.setScale(type.decimalDigits, RoundingMode.DOWN)
-            // rest = divident - (truncatedQuotient * divisor)
-            val rest: BigDecimal = dividend.subtract(truncatedQuotient.multiply(divisor))
-            assign(statement.mvrTarget, DecimalValue(rest.setScale(restType.decimalDigits, RoundingMode.DOWN)))
-        }
-        return if (statement.halfAdjust) {
-            DecimalValue(quotient.setScale(type.decimalDigits, RoundingMode.HALF_UP))
-        } else {
-            DecimalValue(quotient.setScale(type.decimalDigits, RoundingMode.DOWN))
+
+        try {
+            return when {
+                /*
+                 * When dividend and divisor are arrays with the same number of elements, the operation uses the first element
+                 * from every array, then the second element from every array until all elements in the arrays are processed.
+                 * If the arrays do not have the same number of entries, the operation ends when the last element of the
+                 * array with the fewest elements has been processed.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
+                dividend is ConcreteArrayValue && divisor is ConcreteArrayValue -> {
+                    val newLeftSize = when {
+                        dividend.elements.size > divisor.elements.size -> divisor.elements.size
+                        dividend.elements.size < divisor.elements.size -> dividend.elements.size
+                        else -> dividend.elements.size
+                    }
+                    val newDividend = divisor.elements.subList(0, newLeftSize).mapIndexed { index, value ->
+                        calculate(dividend.elements[index], value, statement.halfAdjust, type, statement.mvrTarget) }.toMutableList()
+                    if (dividend.elements.size > divisor.elements.size) {
+                        newDividend.addAll(dividend.elements.subList(divisor.elements.size, dividend.elements.size).toMutableList())
+                    }
+
+                    ConcreteArrayValue(newDividend, divisor.elementType)
+                }
+                /*
+                 * When dividend or divisor is a field, a literal, or a figurative constant and the other is array,
+                 * the operation is done once for every element in the shorter array.
+                 * The same field, literal, or figurative constant is used in all of the operations.
+                 * @url https://www.ibm.com/docs/en/i/7.5?topic=arrays-specifying-array-in-calculations
+                 */
+                dividend is NumberValue && divisor is ConcreteArrayValue -> {
+                    val newDividend = divisor.elements.mapIndexed { index, value -> calculate(dividend, value, statement.halfAdjust, type, statement.mvrTarget) }.toMutableList()
+                    ConcreteArrayValue(newDividend, divisor.elementType)
+                }
+                dividend is ConcreteArrayValue && divisor is NumberValue -> {
+                    val newLeft = dividend.elements.mapIndexed { index, value -> calculate(dividend, value, statement.halfAdjust, type, statement.mvrTarget) }.toMutableList()
+                    ConcreteArrayValue(newLeft, dividend.elementType)
+                }
+                else -> calculate(dividend, divisor, statement.halfAdjust, type, statement.mvrTarget)
+            }
+        } catch (e: Exception) {
+            throw UnsupportedOperationException("I do not know how to multiply $dividend and $divisor at ${statement.position}")
         }
     }
 

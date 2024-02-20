@@ -321,39 +321,39 @@
      C     £DBG_Str      DSPLY
 
      D* DIV con tre array
-     C*                  EVAL      A20_AR4(1)=1
-     C*                  EVAL      A20_AR4(2)=2
-     C*                  EVAL      A20_AR4(3)=3
-     C*                  EVAL      A20_AR4(4)=4
-     C*                  EVAL      A20_AR4(5)=5
-     C*                  EVAL      A20_AR4(6)=6
-     C*                  EVAL      A20_AR5(1)=6
-     C*                  EVAL      A20_AR5(2)=5
-     C*                  EVAL      A20_AR5(3)=4
-     C*                  EVAL      A20_AR5(4)=3
-     C*                  EVAL      A20_AR5(5)=2
-     C*                  EVAL      A20_AR5(6)=1
-     C*    A20_AR4       DIV       A20_AR5       A20_ARES2
-     C*                  EVAL      £DBG_Str='Res('
-     C*                                   +%CHAR(A20_ARES2(1))+', '
-     C*                                   +%CHAR(A20_ARES2(2))+', '
-     C*                                   +%CHAR(A20_ARES2(3))+', '
-     C*                                   +%CHAR(A20_ARES2(4))+', '
-     C*                                   +%CHAR(A20_ARES2(5))+', '
-     C*                                   +%CHAR(A20_ARES2(6))
-     C*                                   +') Fact2('
-     C*                                   +%CHAR(A20_AR5(1))+', '
-     C*                                   +%CHAR(A20_AR5(2))+', '
-     C*                                   +%CHAR(A20_AR5(3))+', '
-     C*                                   +%CHAR(A20_AR5(4))+', '
-     C*                                   +%CHAR(A20_AR5(5))+', '
-     C*                                   +%CHAR(A20_AR5(6))
-     C*                                   +') Fact1('
-     C*                                   +%CHAR(A20_AR4(1))+', '
-     C*                                   +%CHAR(A20_AR4(2))+', '
-     C*                                   +%CHAR(A20_AR4(3))+', '
-     C*                                   +%CHAR(A20_AR4(4))+', '
-     C*                                   +%CHAR(A20_AR4(5))+', '
-     C*                                   +%CHAR(A20_AR4(6))
-     C*                                   +')'
-     C*    £DBG_Str      DSPLY
+     C                   EVAL      A20_AR4(1)=1
+     C                   EVAL      A20_AR4(2)=2
+     C                   EVAL      A20_AR4(3)=3
+     C                   EVAL      A20_AR4(4)=4
+     C                   EVAL      A20_AR4(5)=5
+     C                   EVAL      A20_AR4(6)=6
+     C                   EVAL      A20_AR5(1)=6
+     C                   EVAL      A20_AR5(2)=5
+     C                   EVAL      A20_AR5(3)=4
+     C                   EVAL      A20_AR5(4)=3
+     C                   EVAL      A20_AR5(5)=2
+     C                   EVAL      A20_AR5(6)=1
+     C     A20_AR4       DIV       A20_AR5       A20_ARES2
+     C                   EVAL      £DBG_Str='Res('
+     C                                    +%CHAR(A20_ARES2(1))+', '
+     C                                    +%CHAR(A20_ARES2(2))+', '
+     C                                    +%CHAR(A20_ARES2(3))+', '
+     C                                    +%CHAR(A20_ARES2(4))+', '
+     C                                    +%CHAR(A20_ARES2(5))+', '
+     C                                    +%CHAR(A20_ARES2(6))
+     C                                    +') Fact2('
+     C                                    +%CHAR(A20_AR5(1))+', '
+     C                                    +%CHAR(A20_AR5(2))+', '
+     C                                    +%CHAR(A20_AR5(3))+', '
+     C                                    +%CHAR(A20_AR5(4))+', '
+     C                                    +%CHAR(A20_AR5(5))+', '
+     C                                    +%CHAR(A20_AR5(6))
+     C                                    +') Fact1('
+     C                                    +%CHAR(A20_AR4(1))+', '
+     C                                    +%CHAR(A20_AR4(2))+', '
+     C                                    +%CHAR(A20_AR4(3))+', '
+     C                                    +%CHAR(A20_AR4(4))+', '
+     C                                    +%CHAR(A20_AR4(5))+', '
+     C                                    +%CHAR(A20_AR4(6))
+     C                                    +')'
+     C     £DBG_Str      DSPLY

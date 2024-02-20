@@ -264,8 +264,9 @@ fun coerce(value: Value, type: Type): Value {
             }
         }
         is IntValue -> {
-            when (type) {
-                is StringType -> StringValue(value.value.toString(), varying = type.varying)
+            when {
+                type is StringType -> StringValue(value.value.toString(), varying = type.varying)
+                type is NumberType && type.decimalDigits > 0 -> coerce(value.asDecimal(), type)
                 else -> value
             }
         }
