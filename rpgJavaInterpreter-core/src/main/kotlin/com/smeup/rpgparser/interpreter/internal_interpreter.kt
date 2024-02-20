@@ -738,7 +738,7 @@ open class InternalInterpreter(
                         else -> left.elements.size
                     }
                     val newLeft = right.elements.subList(0, newLeftSize).mapIndexed { index, value -> calculate(left.elements[index], value, statement.halfAdjust, type) }.toMutableList()
-                    if (left.elements.size > right.elements.size) {
+                    if ((left.elements.size > right.elements.size) && (statement.factor1 == null)) {
                         newLeft.addAll(left.elements.subList(right.elements.size, left.elements.size).toMutableList())
                     }
 
@@ -821,7 +821,7 @@ open class InternalInterpreter(
                     }
                     val newDividend = divisor.elements.subList(0, newLeftSize).mapIndexed { index, value ->
                         calculate(dividend.elements[index], value, statement.halfAdjust, type, statement.mvrTarget) }.toMutableList()
-                    if (dividend.elements.size > divisor.elements.size) {
+                    if ((dividend.elements.size > divisor.elements.size) && (statement.factor1 == null)) {
                         newDividend.addAll(dividend.elements.subList(divisor.elements.size, dividend.elements.size).toMutableList())
                     }
 
@@ -1053,7 +1053,7 @@ open class InternalInterpreter(
                         else -> addend1.elements.size
                     }
                     val newAddend2 = addend2.elements.subList(0, newAddend2Size).mapIndexed { index, value -> calculate(addend1.elements[index], value) }.toMutableList()
-                    if (addend1.elements.size > addend2.elements.size) {
+                    if ((addend1.elements.size > addend2.elements.size) && (statement.left == null)) {
                         newAddend2.addAll(addend1.elements.subList(addend2.elements.size, addend1.elements.size).toMutableList())
                     }
 
@@ -1116,7 +1116,7 @@ open class InternalInterpreter(
                         else -> minuend.elements.size
                     }
                     val newMinuend = subtrahend.elements.subList(0, newMinuendSize).mapIndexed { index, value -> calculate(minuend.elements[index], value) }.toMutableList()
-                    if (minuend.elements.size > subtrahend.elements.size) {
+                    if ((minuend.elements.size > subtrahend.elements.size) && (statement.left == null)) {
                         newMinuend.addAll(minuend.elements.subList(subtrahend.elements.size, minuend.elements.size).toMutableList())
                     }
 
