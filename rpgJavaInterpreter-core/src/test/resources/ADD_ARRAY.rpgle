@@ -157,3 +157,31 @@
      C                                  +%CHAR(ARRDECRES(2))+', '
      C                                  +%CHAR(ARRDECRES(3))
      C     RES           DSPLY
+
+     D* With integer values and when Factor 1 size is greater than Factor2
+     C                   EVAL      ARRINTRES(1)=0
+     C                   EVAL      ARRINTRES(2)=0
+     C                   EVAL      ARRINTRES(3)=0
+     C                   EVAL      ARRINTF1(1)=1
+     C                   EVAL      ARRINTF1(2)=2
+     C                   EVAL      ARRINTF1(3)=3
+     C                   EVAL      ARRINTF2_S2(1)=3
+     C                   EVAL      ARRINTF2_S2(2)=2
+     C     ARRINTF1      ADD       ARRINTF2_S2   ARRINTRES
+     C                   EVAL      RES=%CHAR(ARRINTRES(1))+', '
+     C                                  +%CHAR(ARRINTRES(2))+', '
+     C                                  +%CHAR(ARRINTRES(3))
+     C     RES           DSPLY
+
+     D* With integer values and when Factor 1 size is smaller than Factor2
+     C*                  CLEAR     ARRINTRES
+     C*                  EVAL      ARRINTF1_S2(1)=1
+     C*                  EVAL      ARRINTF1_S2(2)=2
+     C*                  EVAL      ARRINTF2(1)=3
+     C*                  EVAL      ARRINTF2(2)=2
+     C*                  EVAL      ARRINTF2(3)=1
+     C*    ARRINTF1_S2   ADD       ARRINTF2      ARRINTRES
+     C*                  EVAL      RES=%CHAR(ARRINTRES(1))+', '
+     C*                                 +%CHAR(ARRINTRES(2))+', '
+     C*                                 +%CHAR(ARRINTRES(3))
+     C*    RES           DSPLY
