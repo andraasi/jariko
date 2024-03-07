@@ -534,4 +534,10 @@ open class SmeupInterpreterTest : AbstractTest() {
         val expected = listOf<String>("CALL(MULANGT04 , 1, MULANGTB10: MULANGT04 chiamata 1                  )")
         assertEquals(expected, "smeup/T04_A20_P04".outputOf(configuration = smeupConfig))
     }
+
+    @Test
+    fun executeT20_A10_P03() {
+        val expected = listOf<String>("1000")
+        assertEquals(expected, "smeup/T20_A10_P03".outputOf(configuration = smeupConfig))
+    }
 }
