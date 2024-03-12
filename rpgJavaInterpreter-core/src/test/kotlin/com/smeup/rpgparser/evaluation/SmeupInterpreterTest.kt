@@ -546,4 +546,38 @@ open class SmeupInterpreterTest : AbstractTest() {
         val expected = listOf<String>("1000")
         assertEquals(expected, "smeup/T20_A10_P03".outputOf(configuration = smeupConfig))
     }
+
+    @Test
+    fun executeT10_A45_P01() {
+        val expected = listOf<String>("NUM(0)")
+        assertEquals(expected, "smeup/T10_A45_P01".outputOf(configuration = smeupConfig))
+    }
+
+    @Test
+    fun executeT10_A45_P02() {
+        val expected = listOf<String>("NUM(4)")
+        assertEquals(expected, "smeup/T10_A45_P02".outputOf(configuration = smeupConfig))
+    }
+
+    @Test
+    fun executeT10_A45_P03() {
+        val expected = listOf<String>("NUM(4)")
+        assertEquals(expected, "smeup/T10_A45_P03".outputOf(configuration = smeupConfig))
+    }
+
+    @Test
+    fun executeT12_A04_P13() {
+        val expected = listOf(
+            "CNT()"
+        )
+        assertEquals(expected, "smeup/T12_A04_P13".outputOf())
+    }
+
+    @Test
+    fun executeT12_A04_P14() {
+        val expected = listOf(
+            "CNT()"
+        )
+        assertEquals(expected, "smeup/T12_A04_P14".outputOf())
+    }
 }
