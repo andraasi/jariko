@@ -4,7 +4,7 @@
      D A20_P2          S              2  0
      D A20_P3          S             50
      D £DBG_Str        S             100         VARYING
-
+      *
      C                   CLEAR                   A20_P3
      C                   DO        NNN
      C                   EXSR      SUB_A20_A
@@ -13,7 +13,7 @@
      C                                     +%CHAR(A20_P2)
      C                                     +', '+A20_P3+') '
      C     £DBG_Str      DSPLY
-
+      *
      C     SUB_A20_A     BEGSR
      C                   CALL      A20_C1                               35
       *
