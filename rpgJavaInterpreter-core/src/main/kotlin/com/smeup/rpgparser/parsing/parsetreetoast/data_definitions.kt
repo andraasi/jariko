@@ -744,6 +744,28 @@ internal fun RpgParser.Dcl_dsContext.calculateFieldInfos(knownDataDefinitions: C
     return fieldsList
 }
 
+internal fun RpgParser.Parm_fixedContext.findInStatements(
+    varName: String,
+    knownDataDefinitions: Collection<DataDefinition>,
+    conf: ToAstConfiguration = ToAstConfiguration()
+): Type? {
+    var typeFound = knownDataDefinitions.firstOrNull { it.name.equals(varName, ignoreCase = true) }?.type
+    if (typeFound == null) {
+        rContext().statement().forEach { it ->
+            when {
+                it.dspec() != null -> {
+                    val name = it.dspec().ds_name()?.text ?: it.dspec().dspecConstant().ds_name()?.text
+                    if (varName.equals(name, ignoreCase = true)) {
+                        typeFound = it.dspec().toAst(conf = conf, knownDataDefinitions = knownDataDefinitions.toList()).type
+                    }
+                }
+            }
+        }
+    }
+
+    return typeFound
+}
+
 private fun RpgParser.Parm_fixedContext.toFieldInfo(conf: ToAstConfiguration = ToAstConfiguration(), knownDataDefinitions: Collection<DataDefinition>): FieldInfo {
     var overlayInfo: FieldInfo.OverlayInfo? = null
     val overlay = this.keyword().find { it.keyword_overlay() != null }
@@ -787,16 +809,22 @@ private fun RpgParser.Parm_fixedContext.toFieldInfo(conf: ToAstConfiguration = T
     // compileTimeInterpreter.evaluate(this.rContext(), dim!!).asInt().value.toInt(),
     val arraySizeDeclared = this.arraySizeDeclared(conf)
     val varName = if (isLike) like!!.variable.name else this.name
+    var explicitElementType: Type? = this.calculateExplicitElementType(arraySizeDeclared, conf) ?: knownDataDefinitions.firstOrNull { it.name.equals(varName, ignoreCase = true) }?.type
+    ?: knownDataDefinitions.flatMap { it.fields }.firstOrNull { fe -> fe.name.equals(varName, ignoreCase = true) }?.type
+
+    if (explicitElementType == null && isLike) {
+        explicitElementType = this.findInStatements(varName, knownDataDefinitions, conf)
+    }
+
     return FieldInfo(this.name, overlayInfo = overlayInfo,
-            explicitStartOffset = this.explicitStartOffset(),
-            explicitEndOffset = if (explicitStartOffset() != null) this.explicitEndOffset() else null,
-            explicitElementType = this.calculateExplicitElementType(arraySizeDeclared, conf) ?: knownDataDefinitions.firstOrNull { it.name.equals(varName, ignoreCase = true) }?.type
-                ?: knownDataDefinitions.flatMap { it.fields }.firstOrNull { fe -> fe.name.equals(varName, ignoreCase = true) }?.type,
-            arraySizeDeclared = this.arraySizeDeclared(conf),
-            arraySizeDeclaredOnThisField = this.arraySizeDeclared(conf),
-            initializationValue = initializationValue,
-            descend = descend,
-            position = this.toPosition(conf.considerPosition))
+        explicitStartOffset = this.explicitStartOffset(),
+        explicitEndOffset = if (explicitStartOffset() != null) this.explicitEndOffset() else null,
+        explicitElementType = explicitElementType,
+        arraySizeDeclared = this.arraySizeDeclared(conf),
+        arraySizeDeclaredOnThisField = this.arraySizeDeclared(conf),
+        initializationValue = initializationValue,
+        descend = descend,
+        position = this.toPosition(conf.considerPosition))
 }
 
 fun RpgParser.Dcl_dsContext.declaredSize(): Int? {
