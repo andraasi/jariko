@@ -247,7 +247,7 @@ dcl_pr:  (DS_PrototypeStart identifier datatype? keyword* FREE_SEMI?
 	dcl_pi?
 	end_dcl_pr FREE_SEMI)
 	| (prBegin
-	  parm_fixed*
+	   (parm_fixed|parm_c_fixed)*
 	);
 dcl_pr_field: DS_Parm? (identifier (datatype | like=keyword_like) keyword* FREE_SEMI );
 end_dcl_pr: DS_PrototypeEnd;
@@ -845,12 +845,18 @@ piBegin: DS_FIXED ds_name EXTERNAL_DESCRIPTION DATA_STRUCTURE_TYPE DEF_TYPE_PI F
 
 parm_fixed: DS_FIXED ds_name EXTERNAL_DESCRIPTION DATA_STRUCTURE_TYPE DEF_TYPE_BLANK FROM_POSITION TO_POSITION
 	DATA_TYPE DECIMAL_POSITIONS RESERVED keyword* (EOL|EOF);
-	
+
+parm_c_fixed: DS_FIXED ds_name EXTERNAL_DESCRIPTION DATA_STRUCTURE_TYPE DEF_TYPE_C FROM_POSITION TO_POSITION
+    DATA_TYPE DECIMAL_POSITIONS RESERVED (keyword_const | literal | dspec_bif | SPLAT_ON | SPLAT_OFF | SPLAT_ZEROS | SPLAT_BLANKS)? (EOL|EOF);
+
 pr_parm_fixed: DS_FIXED ds_name? EXTERNAL_DESCRIPTION DATA_STRUCTURE_TYPE DEF_TYPE_BLANK FROM_POSITION TO_POSITION
     DATA_TYPE DECIMAL_POSITIONS RESERVED keyword* (EOL|EOF);
+
+pr_parm_c_fixed: DS_FIXED ds_name EXTERNAL_DESCRIPTION DATA_STRUCTURE_TYPE DEF_TYPE_C FROM_POSITION TO_POSITION
+    DATA_TYPE DECIMAL_POSITIONS RESERVED (keyword_const | literal | dspec_bif | SPLAT_ON | SPLAT_OFF | SPLAT_ZEROS | SPLAT_BLANKS)? (EOL|EOF);
  
-pi_parm_fixed : parm_fixed | (prBegin
-      pr_parm_fixed*
+pi_parm_fixed : (parm_fixed|parm_c_fixed) | (prBegin
+      (pr_parm_fixed|pr_parm_c_fixed)*
     );
 
 // -------- sub procedures --------  
