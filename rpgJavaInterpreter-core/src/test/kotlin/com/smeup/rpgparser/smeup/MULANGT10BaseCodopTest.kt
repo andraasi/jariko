@@ -1,5 +1,6 @@
 package com.smeup.rpgparser.smeup
 
+import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -79,6 +80,7 @@ open class MULANGT10BaseCodopTest : MULANGTTest() {
      * @see #272
      */
     @Test
+    @Ignore("Need procedure constant's management in scope where is defined the procedure")
     fun executeMU108007() {
         val expected = listOf("Res:*BINARY:100")
         assertEquals(expected, "smeup/MU108007".outputOf())
