@@ -75,7 +75,7 @@ open class MULANGT10BaseCodopTest : MULANGTTest() {
     }
 
     /**
-     * Definition with PARM and DS
+     * Using CONST as procedure parameter
      * @see #272
      */
     @Test
