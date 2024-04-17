@@ -73,4 +73,14 @@ open class MULANGT10BaseCodopTest : MULANGTTest() {
         val expected = listOf("CALL_1(          , 1, MULANGTB10:  chiamata 1                           )")
         assertEquals(expected, "smeup/T10_A60_P10".outputOf())
     }
+
+    /**
+     * Definition with PARM and DS
+     * @see #272
+     */
+    @Test
+    fun executeMU108007() {
+        val expected = listOf("Res:*BINARY:100")
+        assertEquals(expected, "smeup/MU108007".outputOf())
+    }
 }
