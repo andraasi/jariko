@@ -9,10 +9,12 @@
     O *  di un'altra DS dichiarata successivamente.
      V* ==============================================================
      D* Sezione delle variabili.
-     D D40_DS1         DS
-     D  D40_DS1_F1                         DIM(9999)
-     D  D40_DS1_F2                         LIKE(£095R_CN)
-     D                                     OVERLAY(D40_DS1_F1:1)
+     D                 DS
+     DAXDS                                 DIM(9999)
+     D XAK                                 LIKE(£095R_CN) OVERLAY(AXDS:1)
+      * If you uncomment second field you get loop
+     D* XAD                                 LIKE(£095R_DP) INZ(0)
+     D*                                     OVERLAY(AXDS:*NEXT)
       * --------------------------------------------------------------
       /COPY QILEGEN,MULANG_D_D
       /COPY QILEGEN,£TABB£1DS
