@@ -2287,12 +2287,17 @@ data class ResetStmt(
 
 @Serializable
 data class ExfmtStmt(
+    val factor1: Expression?,
     override val position: Position? = null
 ) : Statement(position), MockStatement {
     override val loggableEntityName: String
         get() = "EXFMT"
 
-    override fun execute(interpreter: InterpreterCore) {}
+    override fun execute(interpreter: InterpreterCore) {
+        val values = mutableListOf<Value>()
+        factor1?.let { values.add(interpreter.eval(it)) }
+        interpreter.getSystemInterface().display(interpreter.rawRender(values))
+    }
 }
 
 @Serializable

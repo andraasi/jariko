@@ -2002,8 +2002,9 @@ internal fun CsRESETContext.toAst(conf: ToAstConfiguration = ToAstConfiguration(
 
 // TODO
 internal fun CsEXFMTContext.toAst(conf: ToAstConfiguration = ToAstConfiguration()): Statement {
+    val left = leftExpr(conf)
     val position = toPosition(conf.considerPosition)
-    return ExfmtStmt(position)
+    return ExfmtStmt(left, position)
 }
 
 // TODO
