@@ -705,7 +705,7 @@ data class CallStmt(
                     }
                 } else {
                     if (!interpreter.exists(it.param.name)) {
-                        interpreter.assign(it.dataDefinition, interpreter.eval(BlanksRefExpr()))
+                        interpreter.assign(it.dataDefinition, interpreter.eval(BlanksRefExpr(it.position)))
                     }
                 }
             } else {
@@ -1031,12 +1031,14 @@ data class PlistStmt(
 
     override fun dataDefinition(): List<InStatementDataDefinition> {
         val allDataDefinitions = params.mapNotNull { it.dataDefinition }
-        // We do not want params in plist to shadow existing data definitions
-        // They are implicit data definitions only when explicit data definitions are not present
+        /**
+         * We do not want params in plist to shadow existing data definitions
+         * They are implicit data definitions only when explicit data definitions are not present
+         * Does not apply when we are not in a CU (for example with CompileTimeInterpreter)
+         */
         val filtered = allDataDefinitions.filter { paramDataDef ->
             val containingCU = this.ancestor(CompilationUnit::class.java)
-                ?: throw IllegalStateException("Not contained in a CU")
-            containingCU.dataDefinitions.none { it.name == paramDataDef.name }
+            containingCU?.dataDefinitions?.none { it.name == paramDataDef.name } ?: true
         }
         return filtered
     }
@@ -1099,19 +1101,19 @@ data class ClearStmt(
                  */
                 if (this.value.variable.referred?.type is OccurableDataStructureType) {
                     val origValue = interpreter.eval(value) as OccurableDataStructValue
-                    newValue = interpreter.assign(value, BlanksRefExpr()) as OccurableDataStructValue
+                    newValue = interpreter.assign(value, BlanksRefExpr(this.position)) as OccurableDataStructValue
                     newValue.pos(origValue.occurrence)
                 } else {
-                    interpreter.assign(value, BlanksRefExpr())
+                    interpreter.assign(value, BlanksRefExpr(this.position))
                 }
             }
 
             is IndicatorExpr -> {
-                interpreter.assign(value, BlanksRefExpr())
+                interpreter.assign(value, BlanksRefExpr(this.position))
             }
 
             is ArrayAccessExpr -> {
-                interpreter.assign(value, BlanksRefExpr())
+                interpreter.assign(value, BlanksRefExpr(this.position))
             }
 
             else -> throw UnsupportedOperationException("I do not know how to clear ${this.value}")
@@ -1606,7 +1608,7 @@ data class DoStmt(
                     } catch (e: IterException) {
                         // nothing to do here
                     }
-                    interpreter.assign(index, PlusExpr(index, IntLiteral(1)))
+                    interpreter.assign(index, PlusExpr(index, IntLiteral(1), this.position))
                 }
             } catch (e: LeaveException) {
                 // nothing to do here
@@ -1654,6 +1656,49 @@ data class DowStmt(
         val entry = LogEntry(source, LogChannel.STATEMENT.getPropertyName(), action)
         return LazyLogEntry(entry) {
             sep -> "${this.loggableEntityName}${sep}${endExpression.render()}"
+        }
+    }
+}
+
+@Serializable
+data class DOUxxStmt(
+    val comparisonOperator: ComparisonOperator,
+    val factor1: Expression,
+    val factor2: Expression,
+    override val body: List<Statement>,
+    override val position: Position? = null
+) : Statement(position), CompositeStatement, LoopStatement {
+    override val loggableEntityName: String
+        get() = "DOUxx"
+
+    private var _iterations: Long = 0
+    override val iterations: Long
+        get() = _iterations
+
+    override val loopSubject: String
+        get() = ""
+
+    override fun execute(interpreter: InterpreterCore) {
+        try {
+            do {
+                ++_iterations
+                interpreter.execute(body)
+            } while (comparisonOperator.verify(
+                    factor1,
+                    factor2,
+                    interpreter,
+                    interpreter.getLocalizationContext().charset
+                ).isVerified
+            )
+        } catch (e: LeaveException) {
+            // nothing to do here
+        }
+    }
+
+    override fun getStatementLogRenderer(source: LogSourceProvider, action: String): LazyLogEntry {
+        val entry = LogEntry(source, LogChannel.STATEMENT.getPropertyName(), action)
+        return LazyLogEntry(entry) {
+                sep -> "${this.loggableEntityName}${comparisonOperator.symbol}${sep}LEFT: ${factor1.render()}/RIGHT: ${factor2.render()}"
         }
     }
 }
@@ -2346,4 +2391,47 @@ data class BitOffStmt(
 ) : Statement(position), StatementThatCanDefineData, MockStatement {
     override fun execute(interpreter: InterpreterCore) { }
     override fun dataDefinition(): List<InStatementDataDefinition> = dataDefinition?.let { listOf(it) } ?: emptyList()
+}
+
+@Serializable
+data class TestnStmt(
+    var expression: Expression,
+    @Derived val dataDefinition: InStatementDataDefinition? = null,
+    val rightIndicators: WithRightIndicators,
+    override val position: Position? = null
+
+) :
+    Statement(position), StatementThatCanDefineData, WithRightIndicators by rightIndicators {
+    override val loggableEntityName: String
+        get() = "TESTN"
+
+    override fun dataDefinition(): List<InStatementDataDefinition> {
+        if (dataDefinition != null) {
+            return listOf(dataDefinition)
+        }
+        return emptyList()
+    }
+
+    override fun execute(interpreter: InterpreterCore) {
+        if (expression.type() !is StringType) {
+            throw UnsupportedOperationException("The result expression is not a String type")
+        }
+        val valStr = (interpreter.eval(expression) as StringValue).value
+        val regex = "-?[0-9]+(\\.[0-9]+)?".toRegex()
+        val isNumeric = valStr.matches(regex)
+
+        if (isNumeric) {
+            interpreter.setIndicators(this, BooleanValue.TRUE, BooleanValue.FALSE, BooleanValue.FALSE)
+        } else {
+            if (valStr.trim().isEmpty()) {
+                interpreter.setIndicators(this, BooleanValue.FALSE, BooleanValue.FALSE, BooleanValue.TRUE)
+            } else {
+                if (valStr.startsWith(" ")) {
+                    interpreter.setIndicators(this, BooleanValue.FALSE, BooleanValue.TRUE, BooleanValue.FALSE)
+                } else {
+                    interpreter.setIndicators(this, BooleanValue.FALSE, BooleanValue.FALSE, BooleanValue.FALSE)
+                }
+            }
+        }
+    }
 }

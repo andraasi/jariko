@@ -104,13 +104,17 @@ private fun RContext.getDataDefinitions(
     fileDefinitions.values.flatten().toList().removeDuplicatedDataDefinition().forEach {
         dataDefinitionProviders.add(it.updateKnownDataDefinitionsAndGetHolder(knownDataDefinitions))
     }
+
+    // Move the D specs with like because depending on other D specs definitions
+    val sortedStatements = this.statement().moveLikeStatementToTheEnd(conf = conf)
+
     // First pass ignore exception and all the know definitions
-    dataDefinitionProviders.addAll(this.statement()
+    dataDefinitionProviders.addAll(sortedStatements
         .mapNotNull {
             it.toDataDefinitionProvider(conf = conf, knownDataDefinitions = knownDataDefinitions)
         })
     // Second pass, everything, I mean everything
-    dataDefinitionProviders.addAll(this.statement()
+    dataDefinitionProviders.addAll(sortedStatements
         .mapNotNull {
             kotlin.runCatching {
                 when {
@@ -125,15 +129,22 @@ private fun RContext.getDataDefinitions(
                             .updateKnownDataDefinitionsAndGetHolder(knownDataDefinitions)
                     }
                     it.dcl_ds() != null && it.dcl_ds().useLikeDs(conf) -> {
-                        DataDefinitionCalculator(it.dcl_ds().toAstWithLikeDs(
-                            conf = conf,
-                            dataDefinitionProviders = dataDefinitionProviders)
-                        )
+                        DataDefinitionCalculator(
+                            it.dcl_ds().toAstWithLikeDs(
+                                conf = conf,
+                                dataDefinitionProviders = dataDefinitionProviders
+                            )
+                        ).toDataDefinition().updateKnownDataDefinitionsAndGetHolder(knownDataDefinitions)
                     }
                     it.dcl_ds() != null && it.dcl_ds().useExtName() && fileDefinitions.keys.any { fileDefinition ->
                         fileDefinition.name.equals(it.dcl_ds().getKeywordExtName().getExtName(), ignoreCase = true)
                     } -> {
-                        DataDefinitionCalculator(it.dcl_ds().toAstWithExtName(conf, fileDefinitions))
+                        DataDefinitionCalculator(
+                            it.dcl_ds().toAstWithExtName(
+                                conf = conf,
+                                fileDefinitions = fileDefinitions
+                            )
+                        ).toDataDefinition().updateKnownDataDefinitionsAndGetHolder(knownDataDefinitions)
                     }
                     else -> null
                 }
@@ -141,6 +152,16 @@ private fun RContext.getDataDefinitions(
         }
     )
     return dataDefinitionProviders.mapNotNull { kotlin.runCatching { it.toDataDefinition() }.getOrNull() }
+}
+
+private fun List<StatementContext>.moveLikeStatementToTheEnd(conf: ToAstConfiguration): List<StatementContext> {
+    val likeStatements = this.filter {
+        it.dcl_ds()?.useLikeDs(conf = conf) ?: it.dspec()?.useLike() ?: false
+    }
+    val otherStatements = this.filter {
+        !(it.dcl_ds()?.useLikeDs(conf = conf) ?: it.dspec()?.useLike() ?: false)
+    }
+    return otherStatements + likeStatements
 }
 
 private fun DataDefinition.updateKnownDataDefinitionsAndGetHolder(
@@ -151,11 +172,14 @@ private fun DataDefinition.updateKnownDataDefinitionsAndGetHolder(
 }
 
 private fun MutableMap<String, DataDefinition>.addIfNotPresent(dataDefinition: DataDefinition) {
-    if (put(dataDefinition.name, dataDefinition) != null)
+    val old = get(dataDefinition.name)
+    if (old == null || (old.type is RecordFormatType && dataDefinition.type is DataStructureType)) {
+        put(dataDefinition.name, dataDefinition)
+    } else {
         dataDefinition.error("${dataDefinition.name} has been defined twice")
+    }
 }
-
-private fun FileDefinition.toDataDefinitions(): List<DataDefinition> {
+internal fun FileDefinition.toDataDefinitions(): List<DataDefinition> {
     val dataDefinitions = mutableListOf<DataDefinition>()
     val reloadConfig = MainExecutionContext.getConfiguration()
         .reloadConfig ?: error("Not found metadata for $this because missing property reloadConfig in configuration")
@@ -164,7 +188,7 @@ private fun FileDefinition.toDataDefinitions(): List<DataDefinition> {
     }.onFailure { error ->
         error("Not found metadata for $this", error)
     }.getOrNull() ?: error("Not found metadata for $this")
-    if (internalFormatName == null) internalFormatName = metadata.tableName
+    if (internalFormatName == null) internalFormatName = metadata.recordFormat
     dataDefinitions.addAll(
         metadata.fields.map { dbField ->
             dbField.toDataDefinition(prefix = prefix, position = position).apply {
@@ -181,7 +205,7 @@ private fun FileDefinition.toDataDefinitions(): List<DataDefinition> {
     // record format possibly for file video is unuseful
     if (fileType == FileType.DB) {
         val recordFormatDefinition = DataDefinition(
-            name = metadata.recordFormat,
+            internalFormatName!!,
             type = RecordFormatType,
             position = position,
             fields = fieldsDefinition
@@ -369,6 +393,10 @@ private fun Dcl_dsContext.useLikeDs(conf: ToAstConfiguration): Boolean {
         todo(conf = conf)
     }
     return (this.keyword().any { it.keyword_likeds() != null })
+}
+
+private fun DspecContext.useLike(): Boolean {
+    return this.keyword().any { it.keyword_like() != null }
 }
 
 private fun Dcl_dsContext.useExtName(): Boolean {
@@ -934,6 +962,9 @@ internal fun Cspec_fixed_standardContext.toAst(conf: ToAstConfiguration = ToAstC
         this.csBITOFF() != null -> this.csBITOFF()
             .let { it.cspec_fixed_standard_parts().validate(stmt = it.toAst(conf), conf = conf) }
 
+        this.csTESTN() != null -> this.csTESTN()
+            .let { it.cspec_fixed_standard_parts().validate(stmt = it.toAst(conf), conf = conf) }
+
         else -> todo(conf = conf)
     }
 }
@@ -1002,7 +1033,7 @@ private fun annidatedReferenceExpression(
             } else {
                 IntLiteral(indexValue, computeNewPosition(position, text))
             }
-        expr = ArrayAccessExpr(expr, indexExpression)
+        expr = ArrayAccessExpr(expr, indexExpression, position)
     }
     return expr as AssignableExpression
 }
@@ -1393,20 +1424,19 @@ internal fun CsCHECKContext.toAst(conf: ToAstConfiguration): Statement {
 }
 
 private fun FactorContext.toDoubleExpression(conf: ToAstConfiguration, index: Int): Expression =
-    if (this.text.contains(":")) this.text.toDoubleExpression(toPosition(conf.considerPosition), index, conf) else this.content.toAst(conf)
+    if (this.text.contains(":")) this.text.toDoubleExpression(toPosition(conf.considerPosition), index) else this.content.toAst(conf)
 
-private fun String.toDoubleExpression(position: Position?, index: Int, conf: ToAstConfiguration): Expression {
-    val baseStringTokens = this.split(":")
-    val startPosition = 0
+private fun String.toDoubleExpression(position: Position?, index: Int): Expression {
+    val quoteAwareSplitPattern = Regex(""":(?=([^']*'[^']*')*[^']*$)""")
+    val baseStringTokens = this.split(quoteAwareSplitPattern)
     var reference = baseStringTokens[index]
-    val ret: Expression
 
     val regexp = Regex("'(.*?)'")
-    if (reference.matches(regexp)) {
+    val ret = if (reference.matches(regexp)) {
         reference = reference.replace("'", "")
-        ret = StringLiteral(reference, position)
+        StringLiteral(reference, position)
     } else {
-        ret = DataRefExpr(ReferenceByName(reference), position)
+        DataRefExpr(ReferenceByName(reference), position)
     }
     return ret
 }
@@ -1415,7 +1445,9 @@ private fun FactorContext.toIndexedExpression(conf: ToAstConfiguration): Pair<Ex
     if (this.text.contains(":")) this.text.toIndexedExpression(toPosition(conf.considerPosition)) else this.content.toAst(conf) to null
 
 private fun String.toIndexedExpression(position: Position?): Pair<Expression, Int?> {
-    val baseStringTokens = this.split(":")
+    val quoteAwareSplitPattern = Regex(""":(?=([^']*'[^']*')*[^']*$)""")
+    val baseStringTokens = this.split(quoteAwareSplitPattern)
+
     val startPosition =
         when (baseStringTokens.size) {
             !in 1..2 -> throw UnsupportedOperationException("Wrong base string expression at line ${position?.line()}: $this")
@@ -2017,6 +2049,14 @@ internal fun CsREADCContext.toAst(conf: ToAstConfiguration = ToAstConfiguration(
 internal fun CsUNLOCKContext.toAst(conf: ToAstConfiguration = ToAstConfiguration()): Statement {
     val position = toPosition(conf.considerPosition)
     return UnlockStmt(position)
+}
+
+internal fun CsTESTNContext.toAst(conf: ToAstConfiguration = ToAstConfiguration()): TestnStmt {
+    val position = toPosition(conf.considerPosition)
+    val resultExpression = this.cspec_fixed_standard_parts().resultExpression(conf) as AssignableExpression
+    val result = this.cspec_fixed_standard_parts().result.text
+    val dataDefinition = this.cspec_fixed_standard_parts().toDataDefinition(result, position, conf)
+    return TestnStmt(resultExpression, dataDefinition, cspec_fixed_standard_parts().rightIndicators(), position)
 }
 
 // TODO

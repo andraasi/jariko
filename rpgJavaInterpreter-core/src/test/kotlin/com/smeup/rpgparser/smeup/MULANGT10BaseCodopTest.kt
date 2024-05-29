@@ -75,6 +75,16 @@ open class MULANGT10BaseCodopTest : MULANGTTest() {
     }
 
     /**
+     * SCAN with special char
+     * @see LS24002777
+     */
+    @Test
+    fun executeMU103511() {
+        val expected = listOf("Found at: 3")
+        assertEquals(expected, "smeup/MU103511".outputOf())
+    }
+
+    /**
      * Utilization of `LIKEDS` with a `DataDefinition` defined in parent.
      * @see #271
      */
@@ -92,5 +102,24 @@ open class MULANGT10BaseCodopTest : MULANGTTest() {
     fun executeMU105501() {
         val expected = listOf("ABCDEFGHIL, 12")
         assertEquals(expected, "smeup/MU105501".outputOf())
+    }
+
+    /**
+     * CALL with params defined in line and in D-spec
+     * @see #278
+     */
+    @Test
+    fun executeMU106011() {
+        val expected = listOf("CALL(mod:inp   )")
+        assertEquals(expected, "smeup/MU106011".outputOf())
+    }
+
+    /**
+     * TESTN
+     */
+    @Test
+    fun executeMU102501() {
+        val expected = listOf("51=1,52=0,53=0")
+        assertEquals(expected, "smeup/MU102501".outputOf())
     }
 }
