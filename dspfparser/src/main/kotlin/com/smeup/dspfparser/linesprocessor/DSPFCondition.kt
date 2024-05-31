@@ -14,7 +14,7 @@ internal data class DSPFCondition private constructor(
         }
 
         private fun getOp(text: String): BooleanNAryOperator {
-            return BooleanNAryOperator.entries.first { it.value == text[0] }
+            return BooleanNAryOperator.values().first { it.value == text[0] }
         }
 
         private fun getIndicators(text: String): MutableList<DSPFIndicator> {
@@ -22,9 +22,9 @@ internal data class DSPFCondition private constructor(
             val first = text.substring(1, 4)
             val second = text.substring(4, 7)
             val third = text.substring(7, 10)
-            if (first != " ".repeat(3)) indicators.addLast(DSPFIndicator.fromString(first))
-            if (second != " ".repeat(3)) indicators.addLast(DSPFIndicator.fromString(second))
-            if (third != " ".repeat(3)) indicators.addLast(DSPFIndicator.fromString(third))
+            if (first != " ".repeat(3)) indicators.add(DSPFIndicator.fromString(first))
+            if (second != " ".repeat(3)) indicators.add(DSPFIndicator.fromString(second))
+            if (third != " ".repeat(3)) indicators.add(DSPFIndicator.fromString(third))
             return indicators
         }
     }

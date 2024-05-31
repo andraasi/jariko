@@ -17,7 +17,7 @@ internal data class DSPFConditionsGroup private constructor(
             var i = 0
             while (true) {
                 try {
-                    group.addLast(DSPFCondition.fromString(text.substring(i, i + CONDITION_LENGTH)))
+                    group.add(DSPFCondition.fromString(text.substring(i, i + CONDITION_LENGTH)))
                 } catch (exception: Exception) {
                     break
                 }

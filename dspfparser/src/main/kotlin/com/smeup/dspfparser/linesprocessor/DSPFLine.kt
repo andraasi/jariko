@@ -68,7 +68,7 @@ internal data class DSPFLine private constructor(
         }
 
         private fun getTypeOfName(lineSubstrings: DSPFLineSubstrings): TypeOfName {
-            return TypeOfName.entries.first { it.value == lineSubstrings.typeOfName[0] }
+            return TypeOfName.values().first { it.value == lineSubstrings.typeOfName[0] }
         }
 
         private fun getFieldName(lineSubstrings: DSPFLineSubstrings): String {
@@ -76,7 +76,7 @@ internal data class DSPFLine private constructor(
         }
 
         private fun getReference(lineSubstrings: DSPFLineSubstrings): Reference {
-            return Reference.entries.first { it.value == lineSubstrings.reference[0] }
+            return Reference.values().first { it.value == lineSubstrings.reference[0] }
         }
 
         private fun getLength(lineSubstrings: DSPFLineSubstrings): Int? {
@@ -85,7 +85,7 @@ internal data class DSPFLine private constructor(
         }
 
         private fun getDataTypeKeyboardShift(lineSubstrings: DSPFLineSubstrings): DTKBS {
-            return DTKBS.entries.first { it.value == lineSubstrings.dataTypeKeyboardShift[0] }
+            return DTKBS.values().first { it.value == lineSubstrings.dataTypeKeyboardShift[0] }
         }
 
         private fun getDecimalsPositions(lineSubstrings: DSPFLineSubstrings): Int? {
@@ -94,7 +94,7 @@ internal data class DSPFLine private constructor(
         }
 
         private fun getFieldType(lineSubstrings: DSPFLineSubstrings): FieldType {
-            return FieldType.entries.first { it.value == lineSubstrings.fieldType[0] }
+            return FieldType.values().first { it.value == lineSubstrings.fieldType[0] }
         }
 
         private fun getY(lineSubstrings: DSPFLineSubstrings): Int? {

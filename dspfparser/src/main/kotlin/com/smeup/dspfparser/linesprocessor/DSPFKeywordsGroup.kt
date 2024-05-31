@@ -12,7 +12,7 @@ internal data class DSPFKeywordsGroup private constructor(val group: MutableList
         private fun getParametrized(text: String): MutableList<DSPFKeyword> {
             val group: MutableList<DSPFKeyword> = mutableListOf()
             Regex("[a-zA-Z]{1,}\\([^(^)]*\\)").find(text)?.groupValues?.forEach {
-                group.addLast(DSPFKeyword.fromString(it))
+                group.add(DSPFKeyword.fromString(it))
             }
             return group
         }

@@ -24,7 +24,7 @@ internal data class DSPFParameters private constructor(
         private fun getArguments(text: String): MutableList<String> {
             val arguments: MutableList<String> = mutableListOf()
             this.removeBrackets(text).split(' ')?.forEach {
-                arguments.addLast(this.tryRemoveSurroundingSingleQuotes(it))
+                arguments.add(this.tryRemoveSurroundingSingleQuotes(it))
             }
             return arguments
         }

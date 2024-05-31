@@ -19,7 +19,22 @@ plugins {
 group = 'com.smeup.dspfparser'
 version = 'develop-SNAPSHOT'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+}
+
+compileKotlin {
+    sourceCompatibility = "$jvmVersion"
+    targetCompatibility = "$jvmVersion"
+    kotlinOptions.jvmTarget = "$jvmVersion"
+}
+
+
+test {
+    useJUnitPlatform()
 }

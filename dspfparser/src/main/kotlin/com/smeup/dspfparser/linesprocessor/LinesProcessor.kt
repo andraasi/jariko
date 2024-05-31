@@ -16,17 +16,17 @@ internal class LinesProcessor(private val buffer: BufferedReader) {
     val lines: MutableList<DSPFLine> = mutableListOf()
 
     private fun updateLinesSubstrings(lineSubstrings: DSPFLineSubstrings) {
-        this.linesSubstrings.addLast(lineSubstrings)
+        this.linesSubstrings.add(lineSubstrings)
     }
 
     private fun updateUnterminatedLinesSubstringsAndThenEmpty(linesSubstrings: DSPFLineSubstrings) {
-        this.unterminatedLinesSubstrings.addLast(linesSubstrings)
-        this.linesSubstrings.addLast(merge(this.unterminatedLinesSubstrings)!!)
+        this.unterminatedLinesSubstrings.add(linesSubstrings)
+        this.linesSubstrings.add(merge(this.unterminatedLinesSubstrings)!!)
         this.unterminatedLinesSubstrings.clear()
     }
 
     private fun updateUnterminatedLinesSubstrings(linesSubstrings: DSPFLineSubstrings) {
-        this.unterminatedLinesSubstrings.addLast(linesSubstrings)
+        this.unterminatedLinesSubstrings.add(linesSubstrings)
     }
 
     private fun handleComment(lineSubstrings: DSPFLineSubstrings) {
@@ -85,7 +85,7 @@ internal class LinesProcessor(private val buffer: BufferedReader) {
     fun createLines() {
         this.lines.clear()
         this.createLinesSubstrings()
-        this.linesSubstrings.forEach { if (!it.isComment()) this.lines.addLast(DSPFLine.from(it)) }
+        this.linesSubstrings.forEach { if (!it.isComment()) this.lines.add(DSPFLine.from(it)) }
         this.linesSubstrings.clear()
     }
 }
