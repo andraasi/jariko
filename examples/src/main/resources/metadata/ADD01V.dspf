@@ -1,11 +1,10 @@
-     A                                      DSPSIZ(24 80 *DS3)
-     A          R FMT01
-     A                                  1  2'Sum of A and B'
-     A                                  4  1'A:'
-     A            A              5S 2I  4 10
-     A                                  5  1'B:'
-     A            B              5S 2I  5 10
-     A                                  6  1'RESULT:'
-     A            RESULT         5S 2O  6 10
-     A                                  7  1'PGMCTL:'
-     A            PGMCTL         1S 0I  7 10
+                R FMT01
+                                        2  3'Sum of A and B'
+                                        5  3'A:'
+                  A              5S 2I  5  8
+                                        5 16'B:'
+                  B              5S 2I  5 21
+                                        7  3'RESULT:'
+                  RESULT         5S 2O  7 13
+                                        9  3'PGMCTL:'
+                  PGMCTL         1S 0I  9 13

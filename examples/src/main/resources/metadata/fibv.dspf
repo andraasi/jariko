@@ -1,8 +1,8 @@
-     A          R FMT01
-     A                                  1  2'PPDAT-th number of Fibonacci'
-     A                                  4  1'PPDAT:'
-     A            PPDAT          8  0I  4 15
-     A                                  5  1'FINAL_VAL:'
-     A            FINAL_VAL     10  0O  5 15
-     A                                  6  1'PGMCTL:'
-     A            PGMCTL         1  0I  6 15
+                R FMT01
+                                        2  3'PPDAT-th number of Fibonacci'
+                                        5  3'PPDAT:'
+                  PPDAT          8  0I  5 12
+                                        5 23'FINAL_VAL:'
+                  FINAL_VAL     10  0O  5 36
+                                        9  3'PGMCTL:'
+                  PGMCTL         1  0I  9 13

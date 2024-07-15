@@ -65,7 +65,7 @@ private fun renderOutputFields(fields: List<DSPFField>) {
             val string = "$fakeConstField${(member.value as Value).asString().value}"
 
             // - 2 because in terminal x = 0 equals x = 1 in 5250, and the value of x is included (<= sign)
-            currentColumnNo = member.x!! - 2
+            currentColumnNo = member.x!! - 2 - fakeConstField.length
             previousLength = string.length
 
             for (i in previousColumnNo..currentColumnNo) {

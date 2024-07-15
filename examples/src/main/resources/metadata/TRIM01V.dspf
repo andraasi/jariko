@@ -1,8 +1,8 @@
-     A          R FMT01
-     A                                  1  2'Trim of STR'
-     A                                  4  1'STR:'
-     A            STR            9A  I  4 10
-     A                                  5  1'TRM:'
-     A            TRM            9A  O  5 10
-     A                                  6  1'PGMCTL:'
-     A            PGMCTL         1  0I  6 10
+                R FMT01
+                                        2  3'Trim of STR'
+                                        5  3'STR:'
+                  STR            9A  I  5 10
+                                        5 21'TRM:'
+                  TRM            9A  O  5 28
+                                        9  3'PGMCTL:'
+                  PGMCTL         1  0I  9 13
