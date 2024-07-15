@@ -1,8 +1,5 @@
-     A*%%TS  SD  20240627  163058  GUAGIA      REL-V7R5M0  5770-WDS
-     A*%%EC
      A                                      DSPSIZ(24 80 *DS3)
      A          R FMT01
-     A*%%TS  SD  20240627  163058  GUAGIA      REL-V7R5M0  5770-WDS
      A                                  1  2'Sum of A and B'
      A                                  4  1'A:'
      A            A              5S 2I  4 10
