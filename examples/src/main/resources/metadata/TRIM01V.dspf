@@ -1,4 +1,8 @@
-                R FMT01
-                  STR           10   I  0  0
-                  TRM           10   O  0  0
-                  PGMCTL         1  0I  0  0
+     A          R FMT01
+     A                                  1  2'Trim of STR'
+     A                                  4  1'STR:'
+     A            STR            9A  I  4 10
+     A                                  5  1'TRM:'
+     A            TRM            9A  O  5 10
+     A                                  6  1'PGMCTL:'
+     A            PGMCTL         1  0I  6 10

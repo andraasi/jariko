@@ -15,8 +15,100 @@ import com.smeup.rpgparser.interpreter.StringValue
 import com.smeup.rpgparser.interpreter.Value
 import com.smeup.rpgparser.rpginterop.DirRpgProgramFinder
 import java.io.File
+import kotlin.system.exitProcess
 
-// UI control functions
+// === Rendering functions === //
+
+const val MAX_COLUMNS = 80
+const val MAX_LINES = 24
+
+private fun renderScreenLimits() {
+    print("+")
+    for (i in 0..MAX_COLUMNS) {
+        print("-")
+    }
+    print("+")
+}
+
+private fun renderOutputFields(fields: List<DSPFField>) {
+    var previousLineNo = 1
+    var currentLineNo: Int
+    var previousColumnNo: Int
+    var currentColumnNo: Int
+    var previousLength: Int
+
+    renderScreenLimits()
+
+    fields.groupBy { it.y }.toList().sortedBy { it.first }.forEach { group ->
+        currentLineNo = group.first!!
+
+        // handle print of empty lines
+        for (i in previousLineNo..currentLineNo) {
+            if (i == previousLineNo) {
+                println()
+            } else {
+                print("|")
+                for (j in 0..MAX_COLUMNS) {
+                    print(" ")
+                }
+                println("|")
+            }
+        }
+
+        // screen left margin
+        print("|")
+
+        previousColumnNo = 0
+        previousLength = 0
+        group.second.forEach { member ->
+            val fakeConstField = "${member.name}: "
+            val string = "$fakeConstField${(member.value as Value).asString().value}"
+
+            // - 2 because in terminal x = 0 equals x = 1 in 5250, and the value of x is included (<= sign)
+            currentColumnNo = member.x!! - 2
+            previousLength = string.length
+
+            for (i in previousColumnNo..currentColumnNo) {
+                print(" ")
+            }
+
+            print(string)
+            previousColumnNo = currentColumnNo + string.length + 1
+        }
+        for (i in previousColumnNo..MAX_COLUMNS) {
+            print(" ")
+        }
+
+        // screen right margin
+        print("|")
+        previousLineNo = currentLineNo + 1
+    }
+
+    // complete screen fill with empty lines
+    println()
+    for (i in previousLineNo..MAX_LINES) {
+        print("|")
+        for (j in 0..MAX_COLUMNS) {
+            print(" ")
+        }
+        println("|")
+    }
+    renderScreenLimits()
+    if (IS_RUN_FROM_SOURCE) exitProcess(0)
+}
+
+private fun printFields(fields: List<DSPFField>) {
+    Runtime.getRuntime().exec("clear")
+    println()
+    renderOutputFields(fields)
+    println()
+    print("INPUT fields: ")
+    println("${fields.filter { it.type == DSPFFieldType.INPUT }.map { it.name }}")
+    println()
+    println("Insert input: ")
+}
+
+// === UI control functions === //
 
 class UnknownVariable(name: String) : Exception("`$name`")
 class WrongInputSyntax : Exception("Should be: `VAR1=VALUE;VAR2=23`")
@@ -35,21 +127,6 @@ private fun parseInput(input: String): Map<String, String> {
     } catch (e: Exception) {
         throw WrongInputSyntax()
     }
-}
-
-private fun printFields(fields: List<DSPFField>) {
-    println()
-    print("OUTPUT fields:\n")
-    fields.filter { it.type == DSPFFieldType.OUTPUT }.forEach {
-        println("\t|${it.name}=${(it.value as Value).asString().value}|")
-    }
-    println()
-    print("INPUT fields:\n")
-    fields.filter { it.type == DSPFFieldType.INPUT }.forEach {
-        println("\t|${it.name}=${(it.value as Value).asString().value}|")
-    }
-    println()
-    println("Insert input: ")
 }
 
 private fun askInputFor(fields: List<DSPFField>): Map<String, Value> {
@@ -86,14 +163,27 @@ private fun onExfmt(fields: List<DSPFField>, runtimeInterpreterSnapshot: Runtime
     }
 }
 
-// Jariko call setup functions
+// === Jariko call setup functions === //
+const val IS_RUN_FROM_SOURCE = true
 
 private fun createDspfConfig(): DspfConfig {
-    val simpleDspfConfig = SimpleDspfConfig({ }.javaClass.getResource("/metadata")!!.path)
+    val simpleDspfConfig = if (IS_RUN_FROM_SOURCE) {
+        SimpleDspfConfig({ }.javaClass.getResource("/metadata")!!.path)
+    } else {
+        SimpleDspfConfig(".")
+    }
     return DspfConfig(
         metadataProducer = simpleDspfConfig::getMetadata,
         dspfProducer = simpleDspfConfig::dspfProducer
     )
+}
+
+private fun createProgramFinder(): DirRpgProgramFinder {
+    return if (IS_RUN_FROM_SOURCE) {
+        DirRpgProgramFinder(File({ }.javaClass.getResource("/rpg")!!.path))
+    } else {
+        DirRpgProgramFinder(File("."))
+    }
 }
 
 private fun createJarikoCallback(): JarikoCallback {
@@ -109,9 +199,9 @@ private fun createConfig(): Configuration {
     )
 }
 
-fun main() {
-    val programSource = "ADD01.rpgle"
-    val programFinders = listOf(DirRpgProgramFinder(File({ }.javaClass.getResource("/rpg")!!.path)))
+fun main(args: Array<String>) {
+    val programSource = if (IS_RUN_FROM_SOURCE) "ADD01.rpgle" else args[0]
+    val programFinders = listOf(createProgramFinder())
     val program = getProgram(nameOrSource = programSource, programFinders = programFinders)
 
     program.singleCall(emptyList(), configuration = createConfig())
