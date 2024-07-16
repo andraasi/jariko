@@ -59,5 +59,6 @@ class JarikoSocketProgram {
 }
 
 fun main(args: Array<String>) {
-
+    val port = args[0].toInt()
+    val program = JarikoSocketProgram(port)
 }
