@@ -1,7 +1,7 @@
 package com.dspf.multithread
 
+import kotlinx.serialization.json.Json
 import java.net.Socket
-
 // using 'use' will also close the socket; use it wisely
 
 fun receive(socket: Socket): String {
@@ -14,3 +14,7 @@ fun send(socket: Socket, string: String) {
     socket.getOutputStream().bufferedWriter().write("$string\n")
     println("sent: $string")
 }
+
+//
+
+private val json = Json { prettyPrint = true }
