@@ -40,6 +40,7 @@ class SocketProgram {
     private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
         println("executing EXFMT...")
         send(this.client!!, json.encodeToString<List<DSPFField>>(fields))
+//        val values = emptyMap<String, Value>()
         val values = json.decodeFromString<Map<String, Value>>(receive(this.client!!))
         return OnExfmtResponse(snapshot, values)
     }
