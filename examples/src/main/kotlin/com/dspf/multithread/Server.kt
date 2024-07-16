@@ -16,5 +16,5 @@ private fun onExfmt(fields: List<DSPFField>, runtimeInterpreterSnapshot: Runtime
 
 fun main(args: Array<String>) {
     val (program, configuration) = setup(args, ::onExfmt)
-    program.singleCall(emptyList(), configuration = configuration)
+//    program.singleCall(emptyList(), configuration)
 }
