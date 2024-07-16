@@ -13,16 +13,12 @@ import com.smeup.rpgparser.rpginterop.DirRpgProgramFinder
 import java.io.File
 
 private class CLIProgramSetup(
-    private val args: Array<String>,
+    private val programSource: String,
     private var onExfmt: (
         fields: List<DSPFField>,
         snapshot: RuntimeInterpreterSnapshot) -> OnExfmtResponse? = { _, _ -> null }
 ) {
-    private val isRunAsJar: Boolean = this.args.isNotEmpty()
-
-    private fun getProgramSource(): String {
-        return if (isRunAsJar) this.args[0] else "ADD01.rpgle"
-    }
+    private val isRunAsJar: Boolean = false
 
     private fun createDspfConfig(): DspfConfig {
         val simpleDspfConfig = if (isRunAsJar) {
@@ -58,7 +54,7 @@ private class CLIProgramSetup(
     }
 
     fun create(): Pair<CommandLineProgram, Configuration> {
-        val programSource = this.getProgramSource()
+        val programSource = this.programSource
         val programFinders = this.createProgramFinders()
         val program = getProgram(programSource, programFinders = programFinders)
         val configuration = this.createConfig()
@@ -68,11 +64,11 @@ private class CLIProgramSetup(
 }
 
 fun setup(
-    args: Array<String>,
+    programSource: String,
     onExfmtCallback: (
         fields: List<DSPFField>,
         snapshot: RuntimeInterpreterSnapshot) -> OnExfmtResponse?
 ): Pair<CommandLineProgram, Configuration> {
-    val setup = CLIProgramSetup(args, onExfmtCallback)
+    val setup = CLIProgramSetup(programSource, onExfmtCallback)
     return setup.create()
 }

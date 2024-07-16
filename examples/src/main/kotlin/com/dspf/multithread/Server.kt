@@ -43,7 +43,7 @@ class JarikoSocketProgram {
     private fun handleConnection() {
         val programSource = this.receive()
 
-        val (program, configuration) = setup(arrayOf(programSource), ::onExfmt)
+        val (program, configuration) = setup(programSource, ::onExfmt)
         program.singleCall(emptyList(), configuration)
 
         this.client!!.close()
@@ -59,5 +59,5 @@ class JarikoSocketProgram {
 }
 
 fun main(args: Array<String>) {
-    
+
 }
