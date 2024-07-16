@@ -11,6 +11,7 @@ import com.smeup.rpgparser.interpreter.OccurableDataStructValue
 import com.smeup.rpgparser.interpreter.StringValue
 import com.smeup.rpgparser.interpreter.TimeStampValue
 import com.smeup.rpgparser.interpreter.UnlimitedStringValue
+import com.smeup.rpgparser.interpreter.Value
 import com.smeup.rpgparser.serialization.BigDecimalSerializer
 import com.smeup.rpgparser.serialization.LocalDateTimeSerializer
 import kotlinx.serialization.json.Json
@@ -25,19 +26,23 @@ import java.net.Socket
 // saving readers and buffered is mandatory
 // because function creates a new one each time
 
+private const val EOB = "EOB"
+
 fun receive(socket: Socket): String {
     println("receiving...")
     val bufferedReader = socket.getInputStream().bufferedReader()
     val string = StringBuilder()
     var line: String?
+
+    // allows JSON to be collected and parsed correctly
     while (bufferedReader.readLine().also { line = it } != null) {
-        if (line == "EOF") {
+        if (line == EOB) {
             break
         }
         string.append(line)
     }
 
-    println("received: ${string.length}B")
+    println("received ${string.length} B")
     return string.toString()
 }
 
@@ -46,10 +51,10 @@ fun send(socket: Socket, string: String) {
     val bufferedWriter = socket.getOutputStream().bufferedWriter()
     bufferedWriter.write(string)
     bufferedWriter.newLine()
-    bufferedWriter.write("EOF")
+    bufferedWriter.write(EOB)
     bufferedWriter.newLine()
     bufferedWriter.flush()
-    println("sent: ${string.length}B")
+    println("sent ${string.length} B")
 }
 
 // serialization
@@ -58,6 +63,18 @@ private val module = SerializersModule {
     contextual(BigDecimalSerializer)
     contextual(LocalDateTimeSerializer)
     polymorphic(DSPFValue::class) {
+        subclass(IntValue::class)
+        subclass(DecimalValue::class)
+        subclass(StringValue::class)
+        subclass(BooleanValue::class)
+        subclass(TimeStampValue::class)
+        subclass(CharacterValue::class)
+        subclass(ConcreteArrayValue::class)
+        subclass(DataStructValue::class)
+        subclass(OccurableDataStructValue::class)
+        subclass(UnlimitedStringValue::class)
+    }
+    polymorphic(Value::class) {
         subclass(IntValue::class)
         subclass(DecimalValue::class)
         subclass(StringValue::class)
