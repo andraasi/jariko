@@ -29,17 +29,32 @@ class SocketProgram {
         this.thread = Thread(this::handleConnection)
     }
 
-    fun listen() {
-        this.client = this.server.accept()
-        this.thread.start()
-    }
-
     private fun receive(): String {
-        return this.client!!.getInputStream().bufferedReader().readLine()
+        this.client!!.getInputStream().bufferedReader().use {
+            val string = it.readLine()
+            println("received: $string")
+            return string
+        }
     }
 
     private fun send(string: String) {
-        this.client!!.getOutputStream().bufferedWriter().write(string)
+        this.client!!.getOutputStream().bufferedWriter().use {
+            it.write(string)
+            println("sent: $string")
+        }
+    }
+
+    private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
+        println("executing EXFMT...")
+        this.send(fields.toString())
+        val values = this.receive()
+        return OnExfmtResponse(snapshot, emptyMap())
+    }
+
+    fun listen() {
+        this.client = this.server.accept()
+        println("client connected")
+        this.thread.start()
     }
 
     private fun handleConnection() {
@@ -50,18 +65,12 @@ class SocketProgram {
 
         this.client!!.close()
         this.server.close()
-    }
-
-    private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
-        this.send(fields.toString())
-        val values = this.receive()
-        println(values)
-        return OnExfmtResponse(snapshot, emptyMap())
+        println("connection closed")
     }
 }
 
 fun main(args: Array<String>) {
-    val port = args[0].toInt()
+    val port = if (isRunAsJar) args[0].toInt() else 5170
     val program = SocketProgram(port)
     program.listen()
 }

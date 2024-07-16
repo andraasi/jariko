@@ -12,14 +12,14 @@ import com.smeup.rpgparser.interpreter.RuntimeInterpreterSnapshot
 import com.smeup.rpgparser.rpginterop.DirRpgProgramFinder
 import java.io.File
 
+val isRunAsJar: Boolean = false
+
 private class CLIProgramSetup(
     private val programSource: String,
     private var onExfmt: (
         fields: List<DSPFField>,
         snapshot: RuntimeInterpreterSnapshot) -> OnExfmtResponse? = { _, _ -> null }
 ) {
-    private val isRunAsJar: Boolean = false
-
     private fun createDspfConfig(): DspfConfig {
         val simpleDspfConfig = if (isRunAsJar) {
             SimpleDspfConfig(".")
