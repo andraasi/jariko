@@ -11,7 +11,6 @@ import com.smeup.rpgparser.interpreter.OccurableDataStructValue
 import com.smeup.rpgparser.interpreter.StringValue
 import com.smeup.rpgparser.interpreter.TimeStampValue
 import com.smeup.rpgparser.interpreter.UnlimitedStringValue
-import com.smeup.rpgparser.interpreter.Value
 import com.smeup.rpgparser.serialization.BigDecimalSerializer
 import com.smeup.rpgparser.serialization.LocalDateTimeSerializer
 import kotlinx.serialization.json.Json
@@ -20,16 +19,21 @@ import kotlinx.serialization.modules.contextual
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import java.net.Socket
+
 // using 'use' will also close the socket; use it wisely
 
 fun receive(socket: Socket): String {
+    println("receiving...")
     val string = socket.getInputStream().bufferedReader().readLine()
     println("received: $string")
     return string
 }
 
 fun send(socket: Socket, string: String) {
-    socket.getOutputStream().bufferedWriter().write("$string\n")
+    println("sending...")
+    socket.getOutputStream().bufferedWriter().write(string)
+    socket.getOutputStream().bufferedWriter().newLine()
+    socket.getOutputStream().bufferedWriter().flush()
     println("sent: $string")
 }
 

@@ -6,6 +6,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import java.net.Socket
 import java.net.SocketException
+import java.util.Date
 import kotlin.jvm.Throws
 
 class RemoteProgram(
@@ -20,16 +21,23 @@ class RemoteProgram(
         try {
             this.server = Socket(ip, port)
             println("connected")
+
             this.server.use {
                 send(it!!, this.programSource)
                 val fields = json.decodeFromString<List<DSPFField>>(receive(it))
                 val values = startVideoSession(fields)
                 send(it, json.encodeToString<Map<String, Value>>(values))
             }
+
             println("disconnected")
         } catch (e: Exception) {
-            this.server?.close()
+            println("Exception occured: ${e.message}")
+            this.close()
         }
+    }
+
+    private fun close() {
+        this.server?.close()
     }
 }
 

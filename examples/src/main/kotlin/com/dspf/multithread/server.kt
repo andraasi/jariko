@@ -9,6 +9,7 @@ import kotlinx.serialization.encodeToString
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketException
+import java.util.*
 import kotlin.jvm.Throws
 
 class SocketProgram {
@@ -22,11 +23,16 @@ class SocketProgram {
         this.thread = Thread(this::handleConnection)
     }
 
-    private fun close() {
-        println("closing connection...")
-        this.client!!.close()
-        this.server.close()
-        println("connection closed")
+    fun listen() {
+        try {
+            this.client = this.server.accept()
+            println("client connected")
+            this.thread.start()
+        } catch (e: Exception) {
+            println("Exception occured: ${e.message}")
+            this.close()
+            this.thread.interrupt()
+        }
     }
 
     private fun handleConnection() {
@@ -34,26 +40,24 @@ class SocketProgram {
 
         val (program, configuration) = setup(programSource, this::onExfmt)
         program.singleCall(emptyList(), configuration)
+
+        println("program ended")
         this.close()
     }
 
     private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
         println("executing EXFMT...")
         send(this.client!!, json.encodeToString<List<DSPFField>>(fields))
-//        val values = emptyMap<String, Value>()
         val values = json.decodeFromString<Map<String, Value>>(receive(this.client!!))
+        println("returning from EXFMT")
         return OnExfmtResponse(snapshot, values)
     }
 
-    fun listen() {
-        try {
-            this.client = this.server.accept()
-            println("client connected")
-            this.thread.start()
-        } catch (e: Exception) {
-            this.close()
-            this.thread.interrupt()
-        }
+    private fun close() {
+        println("closing connection...")
+        this.client!!.close()
+        this.server.close()
+        println("connection closed")
     }
 }
 
