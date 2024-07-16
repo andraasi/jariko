@@ -16,7 +16,7 @@ private class CLIProgramSetup(
     private val args: Array<String>,
     private var onExfmt: (
         fields: List<DSPFField>,
-        runtimeInterpreterSnapshot: RuntimeInterpreterSnapshot) -> OnExfmtResponse? = { _, _ -> null }
+        snapshot: RuntimeInterpreterSnapshot) -> OnExfmtResponse? = { _, _ -> null }
 ) {
     private val isRunAsJar: Boolean = this.args.isNotEmpty()
 
@@ -71,7 +71,7 @@ fun setup(
     args: Array<String>,
     onExfmtCallback: (
         fields: List<DSPFField>,
-        runtimeInterpreterSnapshot: RuntimeInterpreterSnapshot) -> OnExfmtResponse?
+        snapshot: RuntimeInterpreterSnapshot) -> OnExfmtResponse?
 ): Pair<CommandLineProgram, Configuration> {
     val setup = CLIProgramSetup(args, onExfmtCallback)
     return setup.create()
