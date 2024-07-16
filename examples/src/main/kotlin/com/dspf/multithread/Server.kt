@@ -18,7 +18,7 @@ private fun onExfmt(fields: List<DSPFField>, runtimeInterpreterSnapshot: Runtime
     }
 }
 
-class JarikoSocketProgram {
+class SocketProgram {
     private val server: ServerSocket
     private var client: Socket? = null
     private val thread: Thread
@@ -26,9 +26,11 @@ class JarikoSocketProgram {
     @Throws(SocketException::class)
     constructor(port: Int) {
         this.server = ServerSocket(port)
-        this.client = this.server.accept()
-
         this.thread = Thread(this::handleConnection)
+    }
+
+    fun listen() {
+        this.client = this.server.accept()
         this.thread.start()
     }
 
@@ -60,5 +62,6 @@ class JarikoSocketProgram {
 
 fun main(args: Array<String>) {
     val port = args[0].toInt()
-    val program = JarikoSocketProgram(port)
+    val program = SocketProgram(port)
+    program.listen()
 }
