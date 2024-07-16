@@ -1,5 +1,9 @@
 package com.dspf.multithread
 
+import com.smeup.dspfparser.linesclassifier.DSPFField
+import com.smeup.rpgparser.interpreter.Value
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import java.net.Socket
 import java.net.SocketException
 import kotlin.jvm.Throws
@@ -18,8 +22,9 @@ class RemoteProgram(
             println("connected")
             this.server.use {
                 send(it!!, this.programSource)
-                val fields = receive(it)
-                send(it, fields)
+                val fields = json.decodeFromString<List<DSPFField>>(receive(it))
+                val values = startVideoSession(fields)
+                send(it, json.encodeToString<Map<String, Value>>(values))
             }
             println("disconnected")
         } catch (e: Exception) {

@@ -3,6 +3,9 @@ package com.dspf.multithread
 import com.smeup.dspfparser.linesclassifier.DSPFField
 import com.smeup.rpgparser.interpreter.OnExfmtResponse
 import com.smeup.rpgparser.interpreter.RuntimeInterpreterSnapshot
+import com.smeup.rpgparser.interpreter.Value
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketException
@@ -36,9 +39,9 @@ class SocketProgram {
 
     private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
         println("executing EXFMT...")
-        send(this.client!!, fields.toString())
-        val values = receive(this.client!!)
-        return OnExfmtResponse(snapshot, emptyMap())
+        send(this.client!!, json.encodeToString<List<DSPFField>>(fields))
+        val values = json.decodeFromString<Map<String, Value>>(receive(this.client!!))
+        return OnExfmtResponse(snapshot, values)
     }
 
     fun listen() {

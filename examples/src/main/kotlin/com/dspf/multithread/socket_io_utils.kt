@@ -17,4 +17,4 @@ fun send(socket: Socket, string: String) {
 
 //
 
-private val json = Json { prettyPrint = true }
+val json = Json { prettyPrint = true }
