@@ -23,6 +23,7 @@ class RemoteProgram(
             println("connected")
 
             this.server.use {
+                readln()
                 send(it!!, this.programSource)
                 val fields = json.decodeFromString<List<DSPFField>>(receive(it))
                 val values = startVideoSession(fields)
@@ -42,7 +43,7 @@ class RemoteProgram(
 }
 
 fun main(args: Array<String>) {
-    val programSource = if (isRunAsJar) args[0] else "ADD01.rpgle"
+    val programSource = if (isRunAsJar) args[0] else "add01.rpgle"
     val ip = if (isRunAsJar) args[1] else "localhost"
     val port = if (isRunAsJar) args[2].toInt() else 5170
     val program = RemoteProgram(programSource, ip, port)

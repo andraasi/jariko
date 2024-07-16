@@ -36,17 +36,19 @@ class SocketProgram {
     }
 
     private fun handleConnection() {
+        println("waiting for program source")
         val programSource = receive(this.client!!)
-
         val (program, configuration) = setup(programSource, this::onExfmt)
-        program.singleCall(emptyList(), configuration)
 
-        println("program ended")
+        println("starting program $programSource")
+        program.singleCall(emptyList(), configuration)
+        println("program $programSource ended")
+
         this.close()
     }
 
     private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
-        println("executing EXFMT...")
+        println("executing EXFMT")
         send(this.client!!, json.encodeToString<List<DSPFField>>(fields))
         val values = json.decodeFromString<Map<String, Value>>(receive(this.client!!))
         println("returning from EXFMT")
@@ -54,7 +56,7 @@ class SocketProgram {
     }
 
     private fun close() {
-        println("closing connection...")
+        println("closing connection")
         this.client!!.close()
         this.server.close()
         println("connection closed")

@@ -22,19 +22,34 @@ import java.net.Socket
 
 // using 'use' will also close the socket; use it wisely
 
+// saving readers and buffered is mandatory
+// because function creates a new one each time
+
 fun receive(socket: Socket): String {
     println("receiving...")
-    val string = socket.getInputStream().bufferedReader().readLine()
-    println("received: $string")
-    return string
+    val bufferedReader = socket.getInputStream().bufferedReader()
+    val string = StringBuilder()
+    var line: String?
+    while (bufferedReader.readLine().also { line = it } != null) {
+        if (line == "EOF") {
+            break
+        }
+        string.append(line)
+    }
+
+    println("received: ${string.length}B")
+    return string.toString()
 }
 
 fun send(socket: Socket, string: String) {
     println("sending...")
-    socket.getOutputStream().bufferedWriter().write(string)
-    socket.getOutputStream().bufferedWriter().newLine()
-    socket.getOutputStream().bufferedWriter().flush()
-    println("sent: $string")
+    val bufferedWriter = socket.getOutputStream().bufferedWriter()
+    bufferedWriter.write(string)
+    bufferedWriter.newLine()
+    bufferedWriter.write("EOF")
+    bufferedWriter.newLine()
+    bufferedWriter.flush()
+    println("sent: ${string.length}B")
 }
 
 // serialization
