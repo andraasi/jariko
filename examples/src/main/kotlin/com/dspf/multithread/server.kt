@@ -8,16 +8,6 @@ import java.net.Socket
 import java.net.SocketException
 import kotlin.jvm.Throws
 
-private fun onExfmt(fields: List<DSPFField>, runtimeInterpreterSnapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
-    while (true) {
-        try {
-            return OnExfmtResponse(runtimeInterpreterSnapshot, emptyMap())
-        } catch (e: Exception) {
-            continue
-        }
-    }
-}
-
 class SocketProgram {
     private val server: ServerSocket
     private var client: Socket? = null
@@ -29,43 +19,37 @@ class SocketProgram {
         this.thread = Thread(this::handleConnection)
     }
 
-    private fun receive(): String {
-        this.client!!.getInputStream().bufferedReader().use {
-            val string = it.readLine()
-            println("received: $string")
-            return string
-        }
+    private fun close() {
+        println("closing connection...")
+        this.client!!.close()
+        this.server.close()
+        println("connection closed")
     }
 
-    private fun send(string: String) {
-        this.client!!.getOutputStream().bufferedWriter().use {
-            it.write(string)
-            println("sent: $string")
-        }
+    private fun handleConnection() {
+        val programSource = receive(this.client!!)
+
+        val (program, configuration) = setup(programSource, this::onExfmt)
+        program.singleCall(emptyList(), configuration)
+        this.close()
     }
 
     private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
         println("executing EXFMT...")
-        this.send(fields.toString())
-        val values = this.receive()
+        send(this.client!!, fields.toString())
+        val values = receive(this.client!!)
         return OnExfmtResponse(snapshot, emptyMap())
     }
 
     fun listen() {
-        this.client = this.server.accept()
-        println("client connected")
-        this.thread.start()
-    }
-
-    private fun handleConnection() {
-        val programSource = this.receive()
-
-        val (program, configuration) = setup(programSource, ::onExfmt)
-        program.singleCall(emptyList(), configuration)
-
-        this.client!!.close()
-        this.server.close()
-        println("connection closed")
+        try {
+            this.client = this.server.accept()
+            println("client connected")
+            this.thread.start()
+        } catch (e: Exception) {
+            this.close()
+            this.thread.interrupt()
+        }
     }
 }
 

@@ -4,37 +4,26 @@ import java.net.Socket
 import java.net.SocketException
 import kotlin.jvm.Throws
 
-class RemoteProgram {
-    private var programSource: String? = null
+class RemoteProgram(
+    private val programSource: String,
+    private val ip: String,
+    private val port: Int
+) {
     private var server: Socket? = null
 
     @Throws(SocketException::class)
-    constructor(programSource: String, ip: String, port: Int) {
-        this.programSource = programSource
-        this.server = Socket(ip, port)
-        println("connected")
-    }
-
-    private fun receive(): String {
-        this.server!!.getInputStream().bufferedReader().use {
-            val string = it.readLine()
-            println("received: $string")
-            return string
-        }
-    }
-
-    private fun send(string: String) {
-        this.server!!.getOutputStream().bufferedWriter().use {
-            it.write(string)
-            println("sent: $string")
-        }
-    }
-
     fun call() {
-        this.server.use {
-            this.send(this.programSource!!)
-            val fields = this.receive()
-            this.send(fields)
+        try {
+            this.server = Socket(ip, port)
+            println("connected")
+            this.server.use {
+                send(it!!, this.programSource)
+                val fields = receive(it)
+                send(it, fields)
+            }
+            println("disconnected")
+        } catch (e: Exception) {
+            this.server?.close()
         }
     }
 }
