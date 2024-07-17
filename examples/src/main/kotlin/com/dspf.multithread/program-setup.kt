@@ -12,7 +12,7 @@ import com.smeup.rpgparser.interpreter.RuntimeInterpreterSnapshot
 import com.smeup.rpgparser.rpginterop.DirRpgProgramFinder
 import java.io.File
 
-private const val isRunAsJar: Boolean = false
+private const val isRunAsJar: Boolean = true
 
 private class CLIProgramSetup(
     private val programSource: String,
@@ -63,7 +63,7 @@ private class CLIProgramSetup(
     }
 }
 
-class NotEnoughPortsException : Exception("Supply at least 3 ports to listen to")
+class NotEnoughPortsException : Exception("Supply at 3 ports to listen to")
 
 fun setup(
     programSource: String,
