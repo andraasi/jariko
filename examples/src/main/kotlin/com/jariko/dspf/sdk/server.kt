@@ -41,13 +41,14 @@ class ClientHandler(val id: String, var reader: BufferedReader, var writer: Buff
     private fun receive(): Map<String, Value> {
         try {
             val json = reader.readLine()
-            TODO("Not yet implemented")
+            TODO("json to map")
         } catch (e: Exception) {
             println("Exception occured: ${e.message}")
             synchronized(monitor) {
                 monitor.wait()
             }
-            throw e
+            val json = reader.readLine()
+            TODO("json to map")
         }
     }
 
