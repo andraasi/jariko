@@ -21,10 +21,9 @@ class RemoteProgram(
             this.server = Socket(ip, port)
             println("connected")
 
-            println("waiting for ready signal")
-            receive(this.server!!)
-
             this.server.use {
+                println("waiting for ready signal")
+                receive(this.server!!)
                 send(it!!, this.programSource)
 
                 while(true) {
