@@ -9,9 +9,9 @@ import java.net.SocketException
 import kotlin.jvm.Throws
 
 class RemoteProgram(
-    private val programSource: String,
     private val ip: String,
-    private val port: Int
+    private val port: Int,
+    private val programSource: String
 ) {
     private var server: Socket? = null
 
@@ -23,7 +23,6 @@ class RemoteProgram(
 
             println("waiting for ready signal")
             receive(this.server!!)
-            println("ready")
 
             this.server.use {
                 send(it!!, this.programSource)
@@ -36,21 +35,20 @@ class RemoteProgram(
             }
 
         } catch (e: Exception) {
-            println(e)
+            println("Exception occured: ${e.message}")
             this.close()
-            println("disconnected")
         }
     }
 
     private fun close() {
         this.server?.close()
+        println("disconnected")
     }
 }
 
 fun main(args: Array<String>) {
-    val programSource = if (isRunAsJar) args[0] else "add01.rpgle"
-    val ip = if (isRunAsJar) args[1] else "localhost"
-    val port = if (isRunAsJar) args[2].toInt() else 5170
-    val program = RemoteProgram(programSource, ip, port)
+    val (socket, programSource) = getClientArgs(args)
+    val (ip, port) = socket
+    val program = RemoteProgram(ip, port, programSource)
     program.call()
 }
