@@ -15,60 +15,64 @@ class SocketProgram {
     private val server: ServerSocket
     private var client: Socket? = null
     private val thread: Thread
+    private val logger: Logger
 
     @Throws(SocketException::class)
     constructor(port: Int) {
         this.server = ServerSocket(port)
-        this.thread = Thread(this::handleConnection)
+        this.thread = Thread(this::handleConnection, "${this.server}")
+        this.logger = Logger("${this.server}")
     }
 
     fun listen() {
         try {
-            this.client = this.server.accept()
-            println("client connected")
             this.thread.start()
         } catch (e: Exception) {
-            println("Exception occured: ${e.message}")
+            this.logger.log("Exception occured: ${e.message}")
             this.close()
             this.thread.interrupt()
         }
     }
 
     private fun handleConnection() {
-        println("sending ready signal")
+        this.logger.log("listening...")
+        this.client = this.server.accept()
+        this.logger.log("client connected")
+
+        this.logger.log("sending ready signal")
         send(this.client!!, "READY")
 
-        println("waiting for program source")
+        this.logger.log("waiting for program source")
         val programSource = receive(this.client!!)
         val (program, configuration) = setup(programSource, this::onExfmt)
 
-        println("starting program $programSource")
+        this.logger.log("starting program $programSource")
         program.singleCall(emptyList(), configuration)
-        println("program $programSource ended")
+        this.logger.log("program $programSource ended")
 
         this.close()
     }
 
     private fun onExfmt(fields: List<DSPFField>, snapshot: RuntimeInterpreterSnapshot): OnExfmtResponse? {
-        println("executing EXFMT")
-
+        this.logger.log("executing EXFMT")
         send(this.client!!, json.encodeToString<List<DSPFField>>(fields))
         val values = json.decodeFromString<Map<String, Value>>(receive(this.client!!))
-
-        println("returning from EXFMT")
         return OnExfmtResponse(snapshot, values)
     }
 
     private fun close() {
-        println("closing connection")
         this.client!!.close()
         this.server.close()
-        println("connection closed")
+        this.logger.log("connection closed")
     }
 }
 
 fun main(args: Array<String>) {
-    val port = if (isRunAsJar) args[0].toInt() else 5170
-    val program = SocketProgram(port)
-    program.listen()
+    val ports = getListenPorts(args)
+    val program1 = SocketProgram(ports[0])
+    val program2 = SocketProgram(ports[1])
+    val program3 = SocketProgram(ports[2])
+    program1.listen()
+    program2.listen()
+    program3.listen()
 }

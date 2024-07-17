@@ -12,7 +12,7 @@ import com.smeup.rpgparser.interpreter.RuntimeInterpreterSnapshot
 import com.smeup.rpgparser.rpginterop.DirRpgProgramFinder
 import java.io.File
 
-val isRunAsJar: Boolean = false
+private const val isRunAsJar: Boolean = true
 
 private class CLIProgramSetup(
     private val programSource: String,
@@ -63,6 +63,8 @@ private class CLIProgramSetup(
     }
 }
 
+class NotEnoughPortsException : Exception("Supply at 3 ports to listen to")
+
 fun setup(
     programSource: String,
     onExfmtCallback: (
@@ -71,4 +73,23 @@ fun setup(
 ): Pair<CommandLineProgram, Configuration> {
     val setup = CLIProgramSetup(programSource, onExfmtCallback)
     return setup.create()
+}
+
+fun getListenPorts(args: Array<String>): List<Int> {
+    val ports = mutableListOf<Int>()
+    if (isRunAsJar && args.size < 3) throw NotEnoughPortsException()
+    val port1 = if (isRunAsJar) args[0].toInt() else 5170
+    val port2 = if (isRunAsJar) args[1].toInt() else 5171
+    val port3 = if (isRunAsJar) args[2].toInt() else 5172
+    ports.add(port1)
+    ports.add(port2)
+    ports.add(port3)
+    return ports
+}
+
+fun getClientArgs(args: Array<String>): Pair<Pair<String, Int>, String> {
+    val ip = if (isRunAsJar) args[0] else "localhost"
+    val port = if (isRunAsJar) args[1].toInt() else 5170
+    val programSource = if (isRunAsJar) args[2] else "add01.rpgle"
+    return Pair(Pair(ip, port), programSource)
 }
