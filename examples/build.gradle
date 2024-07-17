@@ -39,6 +39,17 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
+task dspfFromCliFatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'com.jariko.samples.DisplayFileFromCLIKt'
+    }
+    archiveBaseName = project.name + '-dspf-from-cli'
+    archiveVersion = ''
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 task dspfMultithreadServerFatJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'com.dspf.multithread.ServerKt'

@@ -35,7 +35,6 @@ private fun renderOutputFields(fields: List<DSPFField>) {
     var currentLineNo: Int
     var previousColumnNo: Int
     var currentColumnNo: Int
-    var previousLength: Int
 
     renderScreenLimits()
 
@@ -59,14 +58,12 @@ private fun renderOutputFields(fields: List<DSPFField>) {
         print("|")
 
         previousColumnNo = 0
-        previousLength = 0
         group.second.forEach { member ->
             val fakeConstField = "${member.name}: "
             val string = "$fakeConstField${(member.value as Value).asString().value}"
 
             // - 2 because in terminal x = 0 equals x = 1 in 5250, and the value of x is included (<= sign)
             currentColumnNo = member.x!! - 2 - fakeConstField.length
-            previousLength = string.length
 
             for (i in previousColumnNo..currentColumnNo) {
                 print(" ")
