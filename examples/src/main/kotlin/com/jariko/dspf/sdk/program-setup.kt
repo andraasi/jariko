@@ -12,7 +12,11 @@ import com.smeup.rpgparser.interpreter.RuntimeInterpreterSnapshot
 import com.smeup.rpgparser.rpginterop.DirRpgProgramFinder
 import java.io.File
 
-private const val isRunAsJar: Boolean = false
+private var isRunAsJar = false
+
+fun detectRuntime(args: Array<String>) {
+    isRunAsJar = args.isNotEmpty()
+}
 
 class CLIProgramSetup(
     private val programSource: String,

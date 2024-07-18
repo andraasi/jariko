@@ -41,7 +41,8 @@ class Server(private val port: Int) {
     }
 }
 
-fun main() {
+fun main(args: Array<String>) {
+    detectRuntime(args)
     val server = Server(5170)
     server.start()
 }

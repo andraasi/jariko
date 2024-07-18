@@ -13,7 +13,7 @@ import java.io.IOException
 class ClientHandler(val id: String, var reader: BufferedReader, var writer: BufferedWriter) : Runnable {
 
     // TODO implement a thread pool by using Executors.
-    private var jarikoThread = Thread(this)
+    private val jarikoThread = Thread(this)
     private val monitor = Object()
 
     init {
@@ -28,18 +28,11 @@ class ClientHandler(val id: String, var reader: BufferedReader, var writer: Buff
         return OnExfmtResponse(snapshot, values)
     }
 
-    override fun run() {
-        val programSource = askForProgramSource()
-        val setup = CLIProgramSetup(programSource, ::onExfmt)
-        val (program, configuration) = setup.create()
-
-        program.singleCall(emptyList(), configuration)
-    }
-
     private fun askForProgramSource(): String {
         try {
             return read(reader)
         } catch (e: IOException) {
+            println("Exception occurred: ${e.message}")
             wait()
             return askForProgramSource()
         }
@@ -49,6 +42,7 @@ class ClientHandler(val id: String, var reader: BufferedReader, var writer: Buff
         try {
             write(writer, json.encodeToString<List<DSPFField>>(fields))
         } catch (e: IOException) {
+            println("Exception occurred: ${e.message}")
             wait()
             send(fields)
         }
@@ -58,6 +52,7 @@ class ClientHandler(val id: String, var reader: BufferedReader, var writer: Buff
         try {
             return json.decodeFromString<Map<String, Value>>(read(reader))
         } catch (e: IOException) {
+            println("Exception occurred: ${e.message}")
             wait()
             return receive()
         }
@@ -67,6 +62,14 @@ class ClientHandler(val id: String, var reader: BufferedReader, var writer: Buff
         synchronized(monitor) {
             monitor.wait()
         }
+    }
+
+    override fun run() {
+        val programSource = askForProgramSource()
+        val setup = CLIProgramSetup(programSource, ::onExfmt)
+        val (program, configuration) = setup.create()
+
+        program.singleCall(emptyList(), configuration)
     }
 
     fun resume() {
