@@ -1,4 +1,4 @@
-package com.dspf.multithread
+package com.jariko.dspf.sdk
 
 import com.smeup.dspfparser.linesclassifier.DSPFValue
 import com.smeup.rpgparser.interpreter.BooleanValue
