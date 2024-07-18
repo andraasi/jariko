@@ -1,4 +1,4 @@
-package com.dspf.multithread
+package com.jariko.dspf.sdk
 
 import com.smeup.dspfparser.linesclassifier.DSPFField
 import com.smeup.dspfparser.linesclassifier.DSPFFieldType
@@ -12,7 +12,7 @@ import com.smeup.rpgparser.interpreter.Value
 private const val MAX_COLUMNS = 80
 private const val MAX_LINES = 24
 
-private fun renderScreenLimits() {
+private fun renderScreenHorizontalBorders() {
     print("+")
     for (i in 0..MAX_COLUMNS) {
         print("-")
@@ -20,70 +20,69 @@ private fun renderScreenLimits() {
     print("+")
 }
 
+private fun renderScreenVerticalBorder() {
+    print("|")
+}
+
+private fun renderBlankLines(from: Int, to: Int) {
+    for (i in from..to) {
+        if (i == from) {
+            println()
+        } else {
+            print("|")
+            for (j in 0..MAX_COLUMNS) {
+                print(" ")
+            }
+            println("|")
+        }
+    }
+}
+
+private fun renderBlankColumns(from: Int, to: Int) {
+    for (i in from..to) {
+        print(" ")
+    }
+}
+
 private fun renderOutputFields(fields: List<DSPFField>) {
     var previousLineNo = 1
     var currentLineNo: Int
+    var fieldsOnSameLineNo: List<DSPFField>
     var previousColumnNo: Int
     var currentColumnNo: Int
 
-    renderScreenLimits()
+    renderScreenHorizontalBorders()
 
     fields.groupBy { it.y }.toList().sortedBy { it.first }.forEach { group ->
         currentLineNo = group.first!!
+        fieldsOnSameLineNo = group.second
 
-        // handle print of empty lines
-        for (i in previousLineNo..currentLineNo) {
-            if (i == previousLineNo) {
-                println()
-            } else {
-                print("|")
-                for (j in 0..MAX_COLUMNS) {
-                    print(" ")
-                }
-                println("|")
-            }
-        }
-
-        // screen left margin
-        print("|")
+        renderBlankLines(previousLineNo, currentLineNo)
+        renderScreenVerticalBorder()
 
         previousColumnNo = 0
-        group.second.forEach { member ->
+        fieldsOnSameLineNo.forEach { member ->
             val fakeConstField = "${member.name}: "
             val string = "$fakeConstField${(member.value as Value).asString().value}"
-
             // - 2 because in terminal x = 0 equals x = 1 in 5250, and the value of x is included (<= sign)
             currentColumnNo = member.x!! - 2 - fakeConstField.length
 
-            for (i in previousColumnNo..currentColumnNo) {
-                print(" ")
-            }
-
+            renderBlankColumns(previousColumnNo, currentColumnNo)
             print(string)
+
             previousColumnNo = currentColumnNo + string.length + 1
         }
-        for (i in previousColumnNo..MAX_COLUMNS) {
-            print(" ")
-        }
 
-        // screen right margin
-        print("|")
+        renderBlankColumns(previousColumnNo, MAX_COLUMNS)
+        renderScreenVerticalBorder()
         previousLineNo = currentLineNo + 1
     }
-
-    // complete screen fill with empty lines
-    println()
-    for (i in previousLineNo..MAX_LINES) {
-        print("|")
-        for (j in 0..MAX_COLUMNS) {
-            print(" ")
-        }
-        println("|")
-    }
-    renderScreenLimits()
+    
+    renderBlankLines(previousLineNo, MAX_LINES)
+    renderScreenHorizontalBorders()
 }
 
-private fun printFields(fields: List<DSPFField>) {
+private fun render(fields: List<DSPFField>) {
     Runtime.getRuntime().exec("clear")
     println()
     renderOutputFields(fields)
@@ -137,7 +136,7 @@ private fun askInputFor(fields: List<DSPFField>): Map<String, Value> {
 }
 
 fun startVideoSession(fields: List<DSPFField>): Map<String, Value> {
-    printFields(fields)
+    render(fields)
     while (true) {
         try {
             val variablesAndValues = askInputFor(fields)

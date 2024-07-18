@@ -12,7 +12,7 @@ import com.smeup.rpgparser.interpreter.RuntimeInterpreterSnapshot
 import com.smeup.rpgparser.rpginterop.DirRpgProgramFinder
 import java.io.File
 
-private const val isRunAsJar: Boolean = true
+private const val isRunAsJar: Boolean = false
 
 private class CLIProgramSetup(
     private val programSource: String,
